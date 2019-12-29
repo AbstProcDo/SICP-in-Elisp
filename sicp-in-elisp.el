@@ -2,6 +2,10 @@
 ;;
 ;;Place little function on the header
 ;; Constants
+;;; ~/Documents/primary.doom.d/my-config/sicp-in-elisp.el -*- lexical-binding: t; -*-
+;;
+;;Place little function on the header
+;; Constants
 (defvar tolerance 0.00001)
 (defvar dx 0.00001)
 
@@ -13,6 +17,21 @@
 
 (defun posp(x)
   (> x 0))
+
+(defun sicp-evenp(x)
+  (= 0 (% x 2))
+  )
+
+(defun sicp-oddp(x)
+  (not
+   (= 0 (% x 2)))
+  )
+
+(defun divides-p (a b)
+  (= (% b a) 0))
+
+(defun prime-p (n)
+  (= n (smallest-divisor n)))
 
 
 (defun average(a b)
@@ -34,14 +53,7 @@
 
 (defun dec(n) (- n 1))
 
-(defun sicp-evenp(x)
-  (= 0 (% x 2))
-  )
 
-(defun sicp-oddp(x)
-  (not
-   (= 0 (% x 2)))
-  )
 
 ;; alternative abs
 (defun sicp-abs(x)
@@ -50,12 +62,12 @@
         ( t (< x 0) (- x))
         ))
 
-(defun sicp-gcd (a b)
+(defun gcd (a b)
   (if (= b 0)
       a
-    (sicp-gcd b (remainder a b))))
+    (gcd b (remainder a b))))
 
-(defun expmod(base exp m) ;;这个就是python的定义
+(defun expmod(base exp m)
   (cond ((= exp 0) 1)
         ((evenp exp)
          (remainder (square (expmod base (/ exp 2) m))
@@ -64,25 +76,43 @@
          (remainder (* base (expmod base (- exp 1) m))
                     m))))
 
-;; alternavie sqrt
-;; (defun bad-sqrt(x)
-;;   (sqrt-iter 1.0 x)) ;;因为需要两个变量, 所以需要重新构造.
+;;case-1.1.8-sicp-sqrt-1
+(defun sicp-sqrt-1(x)
+  (defun good-enough-p (guess x)
+    (< (abs (- (square guess) x)) 0.001))
+  (defun improve (guess x)
+    (average guess (/ x guess)))
+  (defun sqrt-iter (guess x)
+    (if (good-enough-p guess x)
+        guess
+      (sqrt-iter (improve guess x) x)))
+  (sqrt-iter 1.0 x))
 
-;; (defun sqrt-iter(guess x)
-;;   (if (good-enough-p guess x)
-;;       guess
-;;     (sqrt-iter (improve guess x)
-;;                x)))
+;;case-2.1.1-factorial.el
+(defun factorial(n)
+  (if (= n 1)
+      1
+    (* n (factorial (- n 1)))))
 
-;; (defun good-enough-p(guess x)
-;;   (< (abs (- (square guess) x)) 0.000001))
+;;case-1.2.6-smallest_divisor.el
+(defun smallest-divisor(n)
+  (find-divisor n 2))
 
-;; (defun improve(guess x)
-;;   (average guess (/ x guess)))
+(defun find-divisor (n test-divisor)
+  (cond ((> (square test-divisor) n);;停止点
+         n)
+        ((divides-p test-divisor n)
+         test-divisor)
+        (t (find-divisor
+            n
+            (+ test-divisor 1)))))
 
-;; (defun average(x y)
-;;   (/ (+ x y) 2))
-;; good-sqrt-1
+(defun divides-p (a b)
+  (= (% b a) 0))
+
+(defun prime-p (n)
+  (= n (smallest-divisor n)))
+
 
 
 (defun sqrt-iter(old-guess x)
@@ -192,10 +222,10 @@
 ;;-------------------------------------------------------------
 ;;Helper Functions
 
-(defun pi-sum(a b) 
+(defun pi-sum(a b)
   (if (> a b)
       0
-    (+ (/ 1.0 (* a (+ a 2))) (pi-sum (+ a 4) b)))) 
+    (+ (/ 1.0 (* a (+ a 2))) (pi-sum (+ a 4) b))))
 
 
 (defun sum(term a next b)
@@ -211,7 +241,7 @@
 
 
 
-
+;;case-1.3.4-average-damp.el
 (defun average-damp(f)
   (lambda (x)
     (average x (funcall f x)))
@@ -219,17 +249,19 @@
 ;;(funcall (average-damp #'square) 10)
 
 
+
 (defun fixed-point(f first-guess)
   "doc占位, 不然难看"
   (defun close-enough-p(v1 v2)
     (< (abs (- v1 v2)) tolerance))
-  
+
   (defun try(guess)
     (let ((next (funcall f guess)))
       (if (close-enough-p guess next)
           next
         (try next))))
   (try first-guess))
+
 
 
 (defun bisect_search_std(f neg-point pos-point)
@@ -253,7 +285,7 @@
   "doc"
   (let ((a-value (funcall f a))
         (b-value (funcall f b)))
-    
+
     (cond ((and (negp a-value) (posp b-value))
            (bisect_search_std f a b))
           ((and (negp b-value) (posp a-value))
@@ -261,12 +293,28 @@
           (t ;;自动掉下来
            (error "Values are not of opposite sign" a b)))))
 
-
+;;case-1.3.4-deriv.el
 (defun deriv(g)
   (lambda (x)
     (/ (- (funcall g (+ x dx)) (funcall g x))
        dx)))
 
+
+;;case-1.3.4-newton-transform.el
+(defun newton-transform(g)
+  (lambda (x)
+    (- x (/ (funcall g x)
+            (funcall (deriv g) x)))))
+
+
+;;case-1.3.4-newton-method.el
+(defun newton-method(g guess)
+  (fixed-point (newton-transform g) guess))
+
+
+;;case-1.3.4-fixed-point-of-transform.el
+(defun fixed-point-of-transform(g transform guess)
+  (fixed-point (funcall transform g) guess))
 
 
 

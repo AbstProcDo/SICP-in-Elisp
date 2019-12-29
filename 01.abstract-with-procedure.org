@@ -603,7 +603,6 @@ Using normal-order evaluation, the expression evaluates, step by step, to 0:
    0
 #+END_SRC
 
-
 ** 1.1.7 Example: Square Roots by Newton's Method
 
 Procedures, as introduced above, are much like ordinary mathematical functions.
@@ -970,7 +969,7 @@ Embedded definitions must come first in a procedure body. The management is not 
 
 #+name: 1.2.Procedures and Processes they Generate
 #+ATTR_HTML: :width 700px
- [[file:./images/sicp-1.2-procedures.jpeg]]
+[[file:./images/sicp-1.2-procedures.jpeg]]
 
 ** Pre
 
@@ -1496,7 +1495,6 @@ Lamé's Theorem: If Euclid's Algorithm requires k steps to compute the GCD of so
 We can use this theorem to get an order-of-growth estimate for Euclid's Algorithm. Let n be the smaller of the two inputs to the procedure. If the process takes k steps, then we must have n> Fib (k) k/5. Therefore the number of steps k grows as the logarithm (to the base ) of n. Hence, the order of growth is (log n).
 
 Exercise 1.20[X]  The process that a procedure generates is of course dependent on the rules used by the interpreter. As an example, consider the iterative gcd procedure given above. Suppose we were to interpret this procedure using normal-order evaluation, as discussed in section 1.1.5. (The normal-order-evaluation rule for if is described in exercise 1.5.) Using the substitution method (for normal order), illustrate the process generated in evaluating (gcd 206 40) and indicate the remainder operations that are actually performed. How many remainder operations are actually performed in the normal-order evaluation of (gcd 206 40)? In the applicative-order evaluation?
-
 
 ** 1.2.6 Example: Testing for Primality
 
