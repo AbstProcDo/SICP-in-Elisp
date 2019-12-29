@@ -2583,9 +2583,9 @@ ate to state. At the beginning of the process a is taken to be 1, an
 and Dg(x) is the derivative of g evaluated at x. Newton's method is the use of the fixed-point method we saw above to approximate a solution of the equation by finding a fixed point of the function f.[fn:1-61] For many functions g and for sufficiently good initial guesses for x, Newton's method converges very rapidly to a solution of g(x) = 0.[fn:1-62]
 
 In order to implement Newton's method as a procedure, we must first express the idea of derivative. Note that ``derivative,'' like average damping, is something that transforms a function into another function.
-# 洞见: 此处道出个中真谛, transform a function
+
 For instance, the derivative of the function x x3 is the function x 3x2. In general, if g is a function and dx is a small number, then the derivative Dg of g is the function whose value at any number x is given (in the limit of small dx)
-# 这里完全没有问题.
+
 [[./images/elisp-sicp-01.abstract-with-procedure.org_20191225_103718.png]]
 
 Thus, we can express the idea of derivative (taking dx to be, say, 0.00001) as the procedure
