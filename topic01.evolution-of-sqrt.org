@@ -1,0 +1,173 @@
+#+TITLE: topic01.evolution-of-sqrt
+
+** 1.先提出基本定义
+
+# declarative description of sqrt.
+#+name: case-1.1.7-declarative-sqrt.el
+#+begin_src emacs-lisp :session sicp :lexical t
+(defun sqrt(x)
+  (the y (and (>= y 0)
+              (= (square y) x))))
+#+end_src
+
+** 2.Newton近似法求解
+
+#+name: case-1.1.7-newton-sqrt-completed.el
+#+begin_src emacs-lisp :session sicp :results output
+(defun sqrt(x)
+  (sqrt-iter 1.0 x))
+
+(defun sqrt-iter(guess x)
+ (if (good-enough-p guess x)
+      guess
+      (sqrt-iter (improve guess x)
+                 x)))
+
+(defun good-enough-p(guess x)
+  (< (abs (- (square guess) x)) 0.000001))
+
+(defun improve(guess x)
+  (average guess (/ x guess)))
+
+(defun average(x y)
+  (/ (+ x y) 2))
+(print (sqrt 11))
+#+end_src
+
+#+RESULTS: case-1.1.7-newton-sqrt-completed.el
+:
+: 3.3166248052315686
+
+** 3.近似法求解的漏洞
+  Excise 1.7
+
+#+begin_src emacs-lisp :session sicp :lexical t :results output
+(print (sqrt-iter-cond 1.0 0.0001))
+(print (sqrt-iter-cond 1.0 10000000000000))
+;;(print (sqrt-iter-cond 1.0 10000000000000)) ;exceed the max-depth
+#+end_src
+
+#+RESULTS:
+:
+: 0.03230844833048122
+:
+: endless loop
+
+*** 解决方案一
+
+#+name: case-1.1.7-good-sqrt-iter.el
+#+begin_src emacs-lisp :session sicp :lexical t :results value
+(defun good-enough-p(cur-guess next-guess)
+    (> 0.0001
+       (/ (abs (- next-guess cur-guess))
+          cur-guess)))
+
+(defun sqrt-iter(cur-guess x)
+    (let ((next-guess (improve cur-guess x))) ;;next
+        (if (good-enough-p cur-guess next-guess)
+            next-guess
+            (sqrt-iter next-guess x))))
+(sqrt-iter 1.0 0.0001)
+#+end_src
+
+#+RESULTS: case-1.1.7-good-sqrt-iter.el
+: 0.010000000025490743
+
+*** 解决方案二
+#+name: case-1.1.7-good-sqrt-iter.el
+#+begin_src emacs-lisp :session sicp :lexical t :results value
+(defun good-enough-p(cur-guess next-guess)
+    (> 0.0001
+        (abs (- next-guess cur-guess))))
+
+(defun sqrt-iter(cur-guess x)
+    (let ((next-guess (improve cur-guess x))) ;;next
+        (if (good-enough-p cur-guess next-guess)
+            next-guess
+            (sqrt-iter next-guess x))))
+(sqrt-iter 1.0 0.0001)
+#+end_src
+
+#+RESULTS:
+: 0.010000000025490743
+** 4.Bisection Solution
+#+begin_src emacs-lisp :session sicp :lexical t
+(half-interval-method  (lambda (x) (- (* x x) 11))
+                       1
+                       11.0)
+#+end_src
+
+#+RESULTS:
+: 3.316622734069824
+** 5.Fixed-point Solution
+#+begin_src emacs-lisp :session sicp :lexical t
+(defun sqrt(x)
+  (fixed-point (lambda (y) (average y (/ x y)))
+               1.0))
+(sqrt 11)
+#+end_src
+
+#+RESULTS:
+: 3.3166247903554
+
+这个解决跟练习题1.7的解法一致．
+** 6.Decent Newton Solution
+#+begin_src emacs-lisp :session sicp :lexical t
+(defvar dx 0.00001)
+(defvar tolerance 0.00001)
+
+(defun deriv(g)
+  (lambda (x)
+    (/ (- (funcall g (+ x dx)) (funcall g x))
+       dx)))
+
+(defun fixed-point(f guess)
+  (defun close-enough-p(v1 v2)
+    (< (abs (- v1 v2)) tolerance))
+  (let ((next (funcall f guess)))
+    (if (close-enough-p guess next)
+        next
+      (fixed-point f next)))
+  )
+
+
+(defun newton-transform(g)
+  (lambda (x)
+    (- x (/ (funcall g x)
+            (funcall (deriv g) x)))))
+
+(defun newton-method(g guess)
+  (fixed-point (newton-transform g) guess))
+
+
+(defun sqrt(x)
+  (newton-method (lambda (y) (- (* y y) x))
+                  1.0))
+(sqrt 11)
+#+end_src
+
+#+RESULTS:
+: 3.316624790355423
+** 7.Final Solution
+#+begin_src emacs-lisp :session sicp :lexical t
+(defun sqrt(x)
+  (fixed-point-of-transform (lambda (y) (- (square y) x))
+                            #'newton-transform
+                            1.0))
+(sqrt 11)
+#+end_src
+
+#+RESULTS:
+: 3.316624790355423
+
+#+name: case-1.3.3-fixed-point-of-transform-sqrt.el
+#+begin_src emacs-lisp :session sicp :lexical t
+(defun sqrt(x)
+  (fixed-point-of-transform (lambda (y) (/ x y))
+                            #'average-damp
+                            1.0))
+(sqrt 11)
+#+end_src
+
+#+RESULTS:
+: 3.3166247903554
