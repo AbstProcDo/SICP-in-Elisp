@@ -1,9 +1,5 @@
 ;;; ~/Documents/primary.doom.d/my-config/sicp-in-elisp.el -*- lexical-binding: t; -*-
-;;
-;;Place little function on the header
-;; Constants
-;;; ~/Documents/primary.doom.d/my-config/sicp-in-elisp.el -*- lexical-binding: t; -*-
-;;
+
 ;;Place little function on the header
 ;; Constants
 (defvar tolerance 0.00001)
