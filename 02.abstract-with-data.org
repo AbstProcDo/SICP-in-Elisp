@@ -19,14 +19,14 @@ The use of compound data also enables us to increase the modularity of our progr
 
 The use of compound data leads to a real increase in the expressive power of our programming language. Consider the idea of forming a “linear combination” [[file:fig/math/1c20f003c2a3eda8b289429ee688e20d.svg]]. We might like to write a procedure that would accept [[file:fig/math/09009cdd5fc245e05305bc574dcdc97d.svg]], [[file:fig/math/3e92f417ccfc1f59b0ee22d034c85747.svg]], [[file:fig/math/2f4b15565d0a1018e90c3e1b30b76acc.svg]], and [[file:fig/math/05e4cdb2f26a4f66b68c167423907fea.svg]] as arguments and return the value of [[file:fig/math/1c20f003c2a3eda8b289429ee688e20d.svg]]. This presents no difficulty if the arguments are to be numbers, because we can readily define the procedure
 
-#+BEGIN_SRC lisp
+#+BEGIN_SRC scheme :session sicp
     (define (linear-combination a b x y)
       (+ (* a x) (* b y)))
 #+END_SRC
 
 But suppose we are not concerned only with numbers. Suppose we would like to express, in procedural terms, the idea that one can form linear combinations whenever addition and multiplication are defined---for rational numbers, complex numbers, polynomials, or whatever. We could express this as a procedure of the form
 
-#+BEGIN_SRC lisp
+#+BEGIN_SRC scheme :session sicp
     (define (linear-combination a b x y)
       (add (mul a x) (mul b y)))
 #+END_SRC
@@ -2917,14 +2917,14 @@ Thus, there are two different representations for complex numbers, which are app
 
 To design such a system, we can follow the same data-abstraction strategy we followed in designing the rational-number package in [[2.1.1]]. Assume that the operations on complex numbers are implemented in terms of four selectors: =real-part=, =imag-part=, =magnitude=, and =angle=. Also assume that we have two procedures for constructing complex numbers: =make-from-real-imag= returns a complex number with specified real and imaginary parts, and =make-from-mag-ang= returns a complex number with specified magnitude and angle. These procedures have the property that, for any complex number =z=, both
 
-#+BEGIN_SRC lisp
+#+BEGIN_SRC scheme :session sicp
     (make-from-real-imag (real-part z)
                          (imag-part z))
 #+END_SRC
 
 and
 
-#+BEGIN_SRC lisp
+#+BEGIN_SRC scheme :session sicp
     (make-from-mag-ang (magnitude z)
                        (angle z))
 #+END_SRC
@@ -2933,7 +2933,7 @@ produce complex numbers that are equal to =z=.
 
 Using these constructors and selectors, we can implement arithmetic on complex numbers using the “abstract data” specified by the constructors and selectors, just as we did for rational numbers in [[2.1.1]]. As shown in the formulas above, we can add and subtract complex numbers in terms of real and imaginary parts while multiplying and dividing complex numbers in terms of magnitudes and angles:
 
-#+BEGIN_SRC lisp
+#+BEGIN_SRC scheme :session sicp
     (define (add-complex z1 z2)
       (make-from-real-imag
        (+ (real-part z1) (real-part z2))
@@ -2962,7 +2962,7 @@ In order to make the different choices concrete, imagine that there are two prog
 [[file:fig/math/00f082affa2ccb9cbf780bec93c09821.svg]]
 which relate the real and imaginary parts [[file:fig/math/edd210bae579171a37f4e1f4fb1fef9e.svg]] to the magnitude and the angle [[file:fig/math/96d2a0c9549c061360f8c2994fcdcdb8.svg]].[fn:2-110] Ben's representation is therefore given by the following selectors and constructors:
 
-#+BEGIN_SRC lisp
+#+BEGIN_SRC scheme :session sicp
     (define (real-part z) (car z))
     (define (imag-part z) (cdr z))
 
@@ -2982,7 +2982,7 @@ which relate the real and imaginary parts [[file:fig/math/edd210bae579171a37f4e1
 
 Alyssa, in contrast, chooses to represent complex numbers in polar form. For her, selecting the magnitude and angle is straightforward, but she has to use the trigonometric relations to obtain the real and imaginary parts. Alyssa's representation is:
 
-#+BEGIN_SRC lisp
+#+BEGIN_SRC scheme :session sicp
     (define (real-part z)
       (* (magnitude z) (cos (angle z))))
 
@@ -3011,7 +3011,7 @@ The principle of least commitment can be carried to even further extremes. If we
 
 In order to manipulate tagged data, we will assume that we have procedures =type-tag= and =contents= that extract from a data object the tag and the actual contents (the polar or rectangular coordinates, in the case of a complex number). We will also postulate a procedure =attach-tag= that takes a tag and contents and produces a tagged data object. A straightforward way to implement this is to use ordinary list structure:
 
-#+BEGIN_SRC lisp
+#+BEGIN_SRC scheme :session sicp
     (define (attach-tag type-tag contents)
       (cons type-tag contents))
 
@@ -3030,7 +3030,7 @@ In order to manipulate tagged data, we will assume that we have procedures =type
 
 Using these procedures, we can define predicates =rectangular?= and =polar?=, which recognize rectangular and polar numbers, respectively:
 
-#+BEGIN_SRC lisp
+#+BEGIN_SRC scheme :session sicp
     (define (rectangular? z)
       (eq? (type-tag z) 'rectangular))
 
@@ -3040,7 +3040,7 @@ Using these procedures, we can define predicates =rectangular?= and =polar?=, wh
 
 With type tags, Ben and Alyssa can now modify their code so that their two different representations can coexist in the same system. Whenever Ben constructs a complex number, he tags it as rectangular. Whenever Alyssa constructs a complex number, she tags it as polar. In addition, Ben and Alyssa must make sure that the names of their procedures do not conflict. One way to do this is for Ben to append the suffix =rectangular= to the name of each of his representation procedures and for Alyssa to append =polar= to the names of hers. Here is Ben's revised rectangular representation from [[2.4.1]]:
 
-#+BEGIN_SRC lisp
+#+BEGIN_SRC scheme :session sicp
     (define (real-part-rectangular z) (car z))
     (define (imag-part-rectangular z) (cdr z))
 
@@ -3063,7 +3063,7 @@ With type tags, Ben and Alyssa can now modify their code so that their two diffe
 
 and here is Alyssa's revised polar representation:
 
-#+BEGIN_SRC lisp
+#+BEGIN_SRC scheme :session sicp
     (define (real-part-polar z)
       (* (magnitude-polar z)
          (cos (angle-polar z))))
@@ -3087,7 +3087,7 @@ and here is Alyssa's revised polar representation:
 
 Each generic selector is implemented as a procedure that checks the tag of its argument and calls the appropriate procedure for handling data of that type. For example, to obtain the real part of a complex number, =real-part= examines the tag to determine whether to use Ben's =real-part-rectangular= or Alyssa's =real-part-polar=. In either case, we use =contents= to extract the bare, untagged datum and send this to the rectangular or polar procedure as required:
 
-#+BEGIN_SRC lisp
+#+BEGIN_SRC scheme :session sicp
     (define (real-part z)
       (cond ((rectangular? z)
              (real-part-rectangular (contents z)))
@@ -3123,7 +3123,7 @@ Each generic selector is implemented as a procedure that checks the tag of its a
 
 To implement the complex-number arithmetic operations, we can use the same procedures =add-complex=, =sub-complex=, =mul-complex=, and =div-complex= from [[2.4.1]], because the selectors they call are generic, and so will work with either representation. For example, the procedure =add-complex= is still
 
-#+BEGIN_SRC lisp
+#+BEGIN_SRC scheme :session sicp
     (define (add-complex z1 z2)
       (make-from-real-imag
        (+ (real-part z1) (real-part z2))
@@ -3132,7 +3132,7 @@ To implement the complex-number arithmetic operations, we can use the same proce
 
 Finally, we must choose whether to construct complex numbers using Ben's representation or Alyssa's representation. One reasonable choice is to construct rectangular numbers whenever we have real and imaginary parts and to construct polar numbers whenever we have magnitudes and angles:
 
-#+BEGIN_SRC lisp
+#+BEGIN_SRC scheme :session sicp
     (define (make-from-real-imag x y)
       (make-from-real-imag-rectangular x y))
 
@@ -3172,7 +3172,7 @@ For now, we can assume that =put= and =get= are included in our language. In [[C
 
 Here is how data-directed programming can be used in the complex-number system. Ben, who developed the rectangular representation, implements his code just as he did originally. He defines a collection of procedures, or a  /package/, and interfaces these to the rest of the system by adding entries to the table that tell the system how to operate on rectangular numbers. This is accomplished by calling the following procedure:
 
-#+BEGIN_SRC lisp
+#+BEGIN_SRC scheme :session sicp
     (define (install-rectangular-package)
       ;; internal procedures
       (define (real-part z) (car z))
@@ -3206,7 +3206,7 @@ Notice that the internal procedures here are the same procedures from [[2.4.1]] 
 
 Alyssa's polar package is analogous:
 
-#+BEGIN_SRC lisp
+#+BEGIN_SRC scheme :session sicp
     (define (install-polar-package)
       ;; internal procedures
       (define (magnitude z) (car z))
@@ -3238,7 +3238,7 @@ Even though Ben and Alyssa both still use their original procedures defined with
 
 The complex-arithmetic selectors access the table by means of a general “operation” procedure called =apply-generic=, which applies a generic operation to some arguments. =Apply-generic= looks in the table under the name of the operation and the types of the arguments and applies the resulting procedure if one is present:[fn:2-113]
 
-#+BEGIN_SRC lisp
+#+BEGIN_SRC scheme :session sicp
     (define (apply-generic op . args)
       (let ((type-tags (map type-tag args)))
         (let ((proc (get op type-tags)))
@@ -3252,7 +3252,7 @@ The complex-arithmetic selectors access the table by means of a general “opera
 
 Using =apply-generic=, we can define our generic selectors as follows:
 
-#+BEGIN_SRC lisp
+#+BEGIN_SRC scheme :session sicp
     (define (real-part z)
       (apply-generic 'real-part z))
     (define (imag-part z)
@@ -3267,7 +3267,7 @@ Observe that these do not change at all if a new representation is added to the 
 
 We can also extract from the table the constructors to be used by the programs external to the packages in making complex numbers from real and imaginary parts and from magnitudes and angles. As in [[2.4.2]], we construct rectangular numbers whenever we have real and imaginary parts, and polar numbers whenever we have magnitudes and angles:
 
-#+BEGIN_SRC lisp
+#+BEGIN_SRC scheme :session sicp
     (define (make-from-real-imag x y)
       ((get 'make-from-real-imag
             'rectangular)
@@ -3282,7 +3282,7 @@ We can also extract from the table the constructors to be used by the programs e
 #+BEGIN_QUOTE
   *Exercise 2.73:* [[2.3.2]] described a program that performs symbolic differentiation:
 
-  #+BEGIN_SRC lisp
+  #+BEGIN_SRC scheme :session sicp
       (define (deriv exp var)
         (cond ((number? exp) 0)
               ((variable? exp)
@@ -3305,7 +3305,7 @@ We can also extract from the table the constructors to be used by the programs e
 
   We can regard this program as performing a dispatch on the type of the expression to be differentiated. In this situation the “type tag” of the datum is the algebraic operator symbol (such as =+=) and the operation being performed is =deriv=. We can transform this program into data-directed style by rewriting the basic derivative procedure as
 
-  #+BEGIN_SRC lisp
+  #+BEGIN_SRC scheme :session sicp
       (define (deriv exp var)
          (cond ((number? exp) 0)
                ((variable? exp)
@@ -3325,7 +3325,7 @@ We can also extract from the table the constructors to be used by the programs e
   3. Choose any additional differentiation rule that you like, such as the one for exponents ([[Exercise 2.56]]), and install it in this data-directed system.
   4. In this simple algebraic manipulator the type of an expression is the algebraic operator that binds it together. Suppose, however, we indexed the procedures in the opposite way, so that the dispatch line in =deriv= looked like
 
-     #+BEGIN_SRC lisp
+     #+BEGIN_SRC scheme :session sicp
          ((get (operator exp) 'deriv)
           (operands exp) var)
      #+END_SRC
@@ -3352,7 +3352,7 @@ The key idea of data-directed programming is to handle generic operations in pro
 
 An alternative implementation strategy is to decompose the table into columns and, instead of using “intelligent operations” that dispatch on data types, to work with “intelligent data objects” that dispatch on operation names. We can do this by arranging things so that a data object, such as a rectangular number, is represented as a procedure that takes as input the required operation name and performs the operation indicated. In such a discipline, =make-from-real-imag= could be written as
 
-#+BEGIN_SRC lisp
+#+BEGIN_SRC scheme :session sicp
     (define (make-from-real-imag x y)
       (define (dispatch op)
         (cond ((eq? op 'real-part) x)
@@ -3368,7 +3368,7 @@ An alternative implementation strategy is to decompose the table into columns an
 
 The corresponding =apply-generic= procedure, which applies a generic operation to an argument, now simply feeds the operation's name to the data object and lets the object do the work:[fn:2-114]
 
-#+BEGIN_SRC lisp
+#+BEGIN_SRC scheme :session sicp
     (define (apply-generic op arg) (arg op))
 #+END_SRC
 
@@ -3398,7 +3398,7 @@ This style of programming is called  /message passing/. The name comes from the 
 
 =Apply-generic= also uses the primitive procedure =apply=, which takes two arguments, a procedure and a list. =Apply= applies the procedure, using the elements in the list as arguments. For example,
 
-#+BEGIN_SRC lisp
+#+BEGIN_SRC scheme :session sicp
     (apply + (list 1 2 3 4))
 #+END_SRC
 
@@ -3421,7 +3421,7 @@ The task of designing generic arithmetic operations is analogous to that of desi
 
 The generic arithmetic procedures are defined as follows:
 
-#+BEGIN_SRC lisp
+#+BEGIN_SRC scheme :session sicp
     (define (add x y) (apply-generic 'add x y))
     (define (sub x y) (apply-generic 'sub x y))
     (define (mul x y) (apply-generic 'mul x y))
@@ -3430,7 +3430,7 @@ The generic arithmetic procedures are defined as follows:
 
 We begin by installing a package for handling  /ordinary/ numbers, that is, the primitive numbers of our language. We will tag these with the symbol =scheme-number=. The arithmetic operations in this package are the primitive arithmetic procedures (so there is no need to define extra procedures to handle the untagged numbers). Since these operations each take two arguments, they are installed in the table keyed by the list =(scheme-number scheme-number)=:
 
-#+BEGIN_SRC lisp
+#+BEGIN_SRC scheme :session sicp
     (define (install-scheme-number-package)
       (define (tag x)
         (attach-tag 'scheme-number x))
@@ -3449,14 +3449,14 @@ We begin by installing a package for handling  /ordinary/ numbers, that is, the 
 
 Users of the Scheme-number package will create (tagged) ordinary numbers by means of the procedure:
 
-#+BEGIN_SRC lisp
+#+BEGIN_SRC scheme :session sicp
     (define (make-scheme-number n)
       ((get 'make 'scheme-number) n))
 #+END_SRC
 
 Now that the framework of the generic arithmetic system is in place, we can readily include new kinds of numbers. Here is a package that performs rational arithmetic. Notice that, as a benefit of additivity, we can use without modification the rational-number code from [[2.1.1]] as the internal procedures in the package:
 
-#+BEGIN_SRC lisp
+#+BEGIN_SRC scheme :session sicp
     (define (install-rational-package)
       ;; internal procedures
       (define (numer x) (car x))
@@ -3498,7 +3498,7 @@ Now that the framework of the generic arithmetic system is in place, we can read
 
 We can install a similar package to handle complex numbers, using the tag =complex=. In creating the package, we extract from the table the operations =make-from-real-imag= and =make-from-mag-ang= that were defined by the rectangular and polar packages. Additivity permits us to use, as the internal operations, the same =add-complex=, =sub-complex=, =mul-complex=, and =div-complex= procedures from [[2.4.1]].
 
-#+BEGIN_SRC lisp
+#+BEGIN_SRC scheme :session sicp
     (define (install-complex-package)
       ;; imported procedures from rectangular
       ;; and polar packages
@@ -3551,7 +3551,7 @@ We can install a similar package to handle complex numbers, using the tag =compl
 
 Programs outside the complex-number package can construct complex numbers either from real and imaginary parts or from magnitudes and angles. Notice how the underlying procedures, originally defined in the rectangular and polar packages, are exported to the complex package, and exported from there to the outside world.
 
-#+BEGIN_SRC lisp
+#+BEGIN_SRC scheme :session sicp
     (define (make-complex-from-real-imag x y)
       ((get 'make-from-real-imag 'complex) x y))
     (define (make-complex-from-mag-ang r a)
@@ -3568,7 +3568,7 @@ In the above packages, we used =add-rat=, =add-complex=, and the other arithmeti
 #+BEGIN_QUOTE
   *Exercise 2.77:* Louis Reasoner tries to evaluate the expression =(magnitude z)= where =z= is the object shown in [[Figure 2.24]]. To his surprise, instead of the answer 5 he gets an error message from =apply-generic=, saying there is no method for the operation =magnitude= on the types =(complex)=. He shows this interaction to Alyssa P. Hacker, who says “The problem is that the complex-number selectors were never defined for =complex= numbers, just for =polar= and =rectangular= numbers. All you have to do to make this work is add the following to the =complex= package:”
 
-  #+BEGIN_SRC lisp
+  #+BEGIN_SRC scheme :session sicp
       (put 'real-part '(complex) real-part)
       (put 'imag-part '(complex) imag-part)
       (put 'magnitude '(complex) magnitude)
@@ -3597,7 +3597,7 @@ We have seen how to define a unified arithmetic system that encompasses ordinary
 
 One way to handle cross-type operations is to design a different procedure for each possible combination of types for which the operation is valid. For example, we could extend the complex-number package so that it provides a procedure for adding complex numbers to ordinary numbers and installs this in the table using the tag =(complex scheme-number)=:[fn:2-115]
 
-#+BEGIN_SRC lisp
+#+BEGIN_SRC scheme :session sicp
     (define (add-complex-to-schemenum z x)
       (make-from-real-imag (+ (real-part z) x)
                            (imag-part z)))
@@ -3617,7 +3617,7 @@ In the general situation of completely unrelated operations acting on completely
 
 In general, we can implement this idea by designing coercion procedures that transform an object of one type into an equivalent object of another type. Here is a typical coercion procedure, which transforms a given ordinary number to a complex number with that real part and zero imaginary part:
 
-#+BEGIN_SRC lisp
+#+BEGIN_SRC scheme :session sicp
     (define (scheme-number->complex n)
       (make-complex-from-real-imag
        (contents n) 0))
@@ -3625,7 +3625,7 @@ In general, we can implement this idea by designing coercion procedures that tra
 
 We install these coercion procedures in a special coercion table, indexed under the names of the two types:
 
-#+BEGIN_SRC lisp
+#+BEGIN_SRC scheme :session sicp
     (put-coercion 'scheme-number 'complex
                   scheme-number->complex)
 #+END_SRC
@@ -3634,7 +3634,7 @@ We install these coercion procedures in a special coercion table, indexed under 
 
 Once the coercion table has been set up, we can handle coercion in a uniform manner by modifying the =apply-generic= procedure of [[2.4.3]]. When asked to apply an operation, we first check whether the operation is defined for the arguments' types, just as before. If so, we dispatch to the procedure found in the operation-and-type table. Otherwise, we try coercion. For simplicity, we consider only the case where there are two arguments.[fn:2-116] We check the coercion table to see if objects of the first type can be coerced to the second type. If so, we coerce the first argument and try the operation again. If objects of the first type cannot in general be coerced to the second type, we try the coercion the other way around to see if there is a way to coerce the second argument to the type of the first argument. Finally, if there is no known way to coerce either type to the other type, we give up. Here is the procedure:
 
-#+BEGIN_SRC lisp
+#+BEGIN_SRC scheme :session sicp
     (define (apply-generic op . args)
       (let ((type-tags (map type-tag args)))
         (let ((proc (get op type-tags)))
@@ -3700,7 +3700,7 @@ If the data types in our system can be naturally arranged in a tower, this great
 #+BEGIN_QUOTE
   *Exercise 2.81:* Louis Reasoner has noticed that =apply-generic= may try to coerce the arguments to each other's type even if they already have the same type. Therefore, he reasons, we need to put procedures in the coercion table to  /coerce/ arguments of each type to their own type. For example, in addition to the =scheme-number->complex= coercion shown above, he would do:
 
-  #+BEGIN_SRC lisp
+  #+BEGIN_SRC scheme :session sicp
       (define (scheme-number->scheme-number n) n)
       (define (complex->complex z) z)
 
@@ -3713,14 +3713,14 @@ If the data types in our system can be naturally arranged in a tower, this great
 
   1. With Louis's coercion procedures installed, what happens if =apply-generic= is called with two arguments of type =scheme-number= or two arguments of type =complex= for an operation that is not found in the table for those types? For example, assume that we've defined a generic exponentiation operation:
 
-     #+BEGIN_SRC lisp
+     #+BEGIN_SRC scheme :session sicp
          (define (exp x y)
            (apply-generic 'exp x y))
      #+END_SRC
 
      and have put a procedure for exponentiation in the Scheme-number package but not in any other package:
 
-     #+BEGIN_SRC lisp
+     #+BEGIN_SRC scheme :session sicp
          ;; following added to Scheme-number package
          (put 'exp
               '(scheme-number scheme-number)
@@ -3773,7 +3773,7 @@ Now we must consider how to go about doing arithmetic on polynomials. In this si
 
 We will approach the design of our system by following the familiar discipline of data abstraction. We will represent polynomials using a data structure called a  /poly/, which consists of a variable and a collection of terms. We assume that we have selectors =variable= and =term-list= that extract those parts from a poly and a constructor =make-poly= that assembles a poly from a given variable and a term list. A variable will be just a symbol, so we can use the =same-variable?= procedure of [[2.3.2]] to compare variables. The following procedures define addition and multiplication of polys:
 
-#+BEGIN_SRC lisp
+#+BEGIN_SRC scheme :session sicp
     (define (add-poly p1 p2)
       (if (same-variable? (variable p1)
                           (variable p2))
@@ -3799,7 +3799,7 @@ We will approach the design of our system by following the familiar discipline o
 
 To incorporate polynomials into our generic arithmetic system, we need to supply them with type tags. We'll use the tag =polynomial=, and install appropriate operations on tagged polynomials in the operation table. We'll embed all our code in an installation procedure for the polynomial package, similar to the ones in [[2.5.1]]:
 
-#+BEGIN_SRC lisp
+#+BEGIN_SRC scheme :session sicp
     (define (install-polynomial-package)
       ;; internal procedures
       ;; representation of poly
@@ -3839,7 +3839,7 @@ In order to manipulate term lists, we will assume that we have a constructor =th
 
 Here is the procedure that constructs the term list for the sum of two polynomials:[fn:2-122]
 
-#+BEGIN_SRC lisp
+#+BEGIN_SRC scheme :session sicp
     (define (add-terms L1 L2)
       (cond ((empty-termlist? L1) L2)
             ((empty-termlist? L2) L1)
@@ -3872,7 +3872,7 @@ The most important point to note here is that we used the generic addition proce
 
 In order to multiply two term lists, we multiply each term of the first list by all the terms of the other list, repeatedly using =mul-term-by-all-terms=, which multiplies a given term by all terms in a given term list. The resulting term lists (one for each term of the first list) are accumulated into a sum. Multiplying two terms forms a term whose order is the sum of the orders of the factors and whose coefficient is the product of the coefficients of the factors:
 
-#+BEGIN_SRC lisp
+#+BEGIN_SRC scheme :session sicp
     (define (mul-terms L1 L2)
       (if (empty-termlist? L1)
           (the-empty-termlist)
@@ -3905,7 +3905,7 @@ How should we structure the list that represents a term list? One consideration 
 
 The term lists of dense polynomials are most efficiently represented as lists of the coefficients. For example, [[file:fig/math/0795850a4e18ff44aa3a2868640c29a7.svg]] above would be nicely represented as =(1 2 0 3 -2 -5)=. The order of a term in this representation is the length of the sublist beginning with that term's coefficient, decremented by 1.[fn:2-125]
 
-#+BEGIN_SRC lisp
+#+BEGIN_SRC scheme :session sicp
     (define (adjoin-term term term-list)
       (if (=zero? (coeff term))
           term-list
@@ -3925,7 +3925,7 @@ where ==zero?= is as defined in [[Exercise 2.80]]. (See also [[Exercise 2.87]] b
 
 Users of the polynomial package will create (tagged) polynomials by means of the procedure:
 
-#+BEGIN_SRC lisp
+#+BEGIN_SRC scheme :session sicp
     (define (make-polynomial var terms)
       ((get 'make 'polynomial) var terms))
 #+END_SRC
@@ -3953,7 +3953,7 @@ Users of the polynomial package will create (tagged) polynomials by means of the
 
   Complete the following definition of =div-terms= by filling in the missing expressions. Use this to implement =div-poly=, which takes two polys as arguments and returns a list of the quotient and remainder polys.
 
-  #+BEGIN_SRC lisp
+  #+BEGIN_SRC scheme :session sicp
       (define (div-terms L1 L2)
         (if (empty-termlist? L1)
             (list (the-empty-termlist)
@@ -3997,7 +3997,7 @@ If we modify our rational-arithmetic package so that it uses generic operations,
 #+BEGIN_QUOTE
   *Exercise 2.93:* Modify the rational-arithmetic package to use generic operations, but change =make-rat= so that it does not attempt to reduce fractions to lowest terms. Test your system by calling =make-rational= on two polynomials to produce a rational function:
 
-  #+BEGIN_SRC lisp
+  #+BEGIN_SRC scheme :session sicp
       (define p1 (make-polynomial 'x '((2 1) (0 1))))
       (define p2 (make-polynomial 'x '((3 1) (0 1))))
       (define rf (make-rational p2 p1))
@@ -4008,7 +4008,7 @@ If we modify our rational-arithmetic package so that it uses generic operations,
 
 We can reduce polynomial fractions to lowest terms using the same idea we used with integers: modifying =make-rat= to divide both the numerator and the denominator by their greatest common divisor. The notion of “greatest common divisor” makes sense for polynomials. In fact, we can compute the GCD of two polynomials using essentially the same Euclid's Algorithm that works for integers.[fn:2-126] The integer version is
 
-#+BEGIN_SRC lisp
+#+BEGIN_SRC scheme :session sicp
     (define (gcd a b)
       (if (= b 0)
           a
@@ -4017,7 +4017,7 @@ We can reduce polynomial fractions to lowest terms using the same idea we used w
 
 Using this, we could make the obvious modification to define a GCD operation that works on term lists:
 
-#+BEGIN_SRC lisp
+#+BEGIN_SRC scheme :session sicp
     (define (gcd-terms a b)
       (if (empty-termlist? b)
           a
@@ -4029,7 +4029,7 @@ where =remainder-terms= picks out the remainder component of the list returned b
 #+BEGIN_QUOTE
   *Exercise 2.94:* Using =div-terms=, implement the procedure =remainder-terms= and use this to define =gcd-terms= as above. Now write a procedure =gcd-poly= that computes the polynomial GCD of two polys. (The procedure should signal an error if the two polys are not in the same variable.) Install in the system a generic operation =greatest-common-divisor= that reduces to =gcd-poly= for polynomials and to ordinary =gcd= for ordinary numbers. As a test, try
 
-  #+BEGIN_SRC lisp
+  #+BEGIN_SRC scheme :session sicp
       (define p1
         (make-polynomial
          'x '((4 1) (3 -1) (2 -2) (1 2))))
@@ -4071,7 +4071,7 @@ Thus, here is how to reduce a rational function to lowest terms:
   1. Implement this algorithm as a procedure =reduce-terms= that takes two term lists =n= and =d= as arguments and returns a list =nn=, =dd=, which are =n= and =d= reduced to lowest terms via the algorithm given above. Also write a procedure =reduce-poly=, analogous to =add-poly=, that checks to see if the two polys have the same variable. If so, =reduce-poly= strips off the variable and passes the problem to =reduce-terms=, then reattaches the variable to the two term lists supplied by =reduce-terms=.
   2. Define a procedure analogous to =reduce-terms= that does what the original =make-rat= did for integers:
 
-     #+BEGIN_SRC lisp
+     #+BEGIN_SRC scheme :session sicp
          (define (reduce-integers n d)
            (let ((g (gcd n d)))
              (list (/ n g) (/ d g))))
@@ -4079,7 +4079,7 @@ Thus, here is how to reduce a rational function to lowest terms:
 
      and define =reduce= as a generic operation that calls =apply-generic= to dispatch to either =reduce-poly= (for =polynomial= arguments) or =reduce-integers= (for =scheme-number= arguments). You can now easily make the rational-arithmetic package reduce fractions to lowest terms by having =make-rat= call =reduce= before combining the given numerator and denominator to form a rational number. The system now handles rational expressions in either integers or polynomials. To test your program, try the example at the beginning of this extended exercise:
 
-     #+BEGIN_SRC lisp
+     #+BEGIN_SRC scheme :session sicp
          (define p1
            (make-polynomial 'x '((1 1) (0 1))))
          (define p2
