@@ -14,3 +14,7 @@ SICP常读常新, 如绘画, 层层递进, 构图, 起形, 框架, 明暗, 光�
 
 #+ATTR_HTML: :width 700px
  [[file:./images/sicp-1.2-procedures.jpeg]]
+
+* Building Abstraction with Data
+#+ATTR_HTML: :width 700px
+[[file:images/sicp-02-fishbone.jpeg]]

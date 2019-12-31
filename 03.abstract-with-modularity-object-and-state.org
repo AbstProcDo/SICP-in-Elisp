@@ -1,3 +1,4 @@
+
 * 3) Modularity, Objects, and State
 * Pre
 #+BEGIN_QUOTE
@@ -29,7 +30,7 @@ This view of a system can be a powerful framework for organizing computational m
 
 To illustrate what we mean by having a computational object with time-varying state, let us model the situation of withdrawing money from a bank account. We will do this using a procedure =withdraw=, which takes as argument an =amount= to be withdrawn. If there is enough money in the account to accommodate the withdrawal, then =withdraw= should return the balance remaining after the withdrawal. Otherwise, =withdraw= should return the message /Insufficient funds/. For example, if we begin with $100 in the account, we should obtain the following sequence of responses using =withdraw=:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (withdraw 25)
     75
 
@@ -47,7 +48,7 @@ Observe that the expression =(withdraw 25)=, evaluated twice, yields different v
 
 To implement =withdraw=, we can use a variable =balance= to indicate the balance of money in the account and define =withdraw= as a procedure that accesses =balance=. The =withdraw= procedure checks to see if =balance= is at least as large as the requested =amount=. If so, =withdraw= decrements =balance= by =amount= and returns the new value of =balance=. Otherwise, =withdraw= returns the /Insufficient funds/ message. Here are the definitions of =balance= and =withdraw=:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define balance 100)
 
     (define (withdraw amount)
@@ -59,13 +60,13 @@ To implement =withdraw=, we can use a variable =balance= to indicate the balance
 
 Decrementing =balance= is accomplished by the expression
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (set! balance (- balance amount))
 #+END_SRC
 
 This uses the =set!= special form, whose syntax is
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (set! ⟨name⟩ ⟨new-value⟩)
 #+END_SRC
 
@@ -73,7 +74,7 @@ Here =⟨=name=⟩= is a symbol and =⟨=new-value=⟩= is any expression. =Set!
 
 =Withdraw= also uses the =begin= special form to cause two expressions to be evaluated in the case where the =if= test is true: first decrementing =balance= and then returning the value of =balance=. In general, evaluating the expression
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (begin ⟨exp₁⟩ ⟨exp₂⟩ … ⟨expₖ⟩)
 #+END_SRC
 
@@ -83,7 +84,7 @@ Although =withdraw= works as desired, the variable =balance= presents a problem.
 
 We can make =balance= internal to =withdraw= by rewriting the definition as follows:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define new-withdraw
       (let ((balance 100))
         (lambda (amount)
@@ -100,7 +101,7 @@ Combining =set!= with local variables is the general programming technique we wi
 
 The following procedure, =make-withdraw=, creates “withdrawal processors.” The formal parameter =balance= in =make-withdraw= specifies the initial amount of money in the account.[fn:3-133]
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define (make-withdraw balance)
       (lambda (amount)
         (if (>= balance amount)
@@ -112,7 +113,7 @@ The following procedure, =make-withdraw=, creates “withdrawal processors.” T
 
 =Make-withdraw= can be used as follows to create two objects =W1= and =W2=:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define W1 (make-withdraw 100))
     (define W2 (make-withdraw 100))
 
@@ -133,7 +134,7 @@ Observe that =W1= and =W2= are completely independent objects, each with its own
 
 We can also create objects that handle deposits as well as withdrawals, and thus we can represent simple bank accounts. Here is a procedure that returns a “bank-account object” with a specified initial balance:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define (make-account balance)
       (define (withdraw amount)
         (if (>= balance amount)
@@ -156,7 +157,7 @@ Each call to =make-account= sets up an environment with a local state variable =
 
 =Make-account= can be used as follows:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define acc (make-account 100))
 
     ((acc 'withdraw) 50)
@@ -174,7 +175,7 @@ Each call to =make-account= sets up an environment with a local state variable =
 
 Each call to =acc= returns the locally defined =deposit= or =withdraw= procedure, which is then applied to the specified =amount=. As was the case with =make-withdraw=, another call to =make-account=
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define acc2 (make-account 100))
 #+END_SRC
 
@@ -183,7 +184,7 @@ will produce a completely separate account object, which maintains its own local
 #+BEGIN_QUOTE
   *Exercise 3.1:* An  /accumulator/ is a procedure that is called repeatedly with a single numeric argument and accumulates its arguments into a sum. Each time it is called, it returns the currently accumulated sum. Write a procedure =make-accumulator= that generates accumulators, each maintaining an independent sum. The input to =make-accumulator= should specify the initial value of the sum; for example
 
-  #+BEGIN_SRC scheme
+  #+BEGIN_SRC scheme :session sicp
       (define A (make-accumulator 5))
 
       (A 10)
@@ -198,7 +199,7 @@ will produce a completely separate account object, which maintains its own local
 #+BEGIN_QUOTE
   *Exercise 3.2:* In software-testing applications, it is useful to be able to count the number of times a given procedure is called during the course of a computation. Write a procedure =make-monitored= that takes as input a procedure, =f=, that itself takes one input. The result returned by =make-monitored= is a third procedure, say =mf=, that keeps track of the number of times it has been called by maintaining an internal counter. If the input to =mf= is the special symbol =how-many-calls?=, then =mf= returns the value of the counter. If the input is the special symbol =reset-count=, then =mf= resets the counter to zero. For any other input, =mf= returns the result of calling =f= on that input and increments the counter. For instance, we could make a monitored version of the =sqrt= procedure:
 
-  #+BEGIN_SRC scheme
+  #+BEGIN_SRC scheme :session sicp
       (define s (make-monitored sqrt))
 
       (s 100)
@@ -213,14 +214,14 @@ will produce a completely separate account object, which maintains its own local
 #+BEGIN_QUOTE
   *Exercise 3.3:* Modify the =make-account= procedure so that it creates password-protected accounts. That is, =make-account= should take a symbol as an additional argument, as in
 
-  #+BEGIN_SRC scheme
+  #+BEGIN_SRC scheme :session sicp
       (define acc
         (make-account 100 'secret-password))
   #+END_SRC
 
   The resulting account object should process a request only if it is accompanied by the password with which the account was created, and should otherwise return a complaint:
 
-  #+BEGIN_SRC scheme
+  #+BEGIN_SRC scheme :session sicp
       ((acc 'secret-password 'withdraw) 40)
       60
 
@@ -241,7 +242,7 @@ As we shall see, introducing assignment into our programming language leads us i
 
 It is not at all clear what is meant by “chosen at random.” What we presumably want is for successive calls to =rand= to produce a sequence of numbers that has statistical properties of uniform distribution. We will not discuss methods for generating suitable sequences here. Rather, let us assume that we have a procedure =rand-update= that has the property that if we start with a given number [[file:fig/math/4e7007fd1b5dc307c428f9f0c386469b.svg]] and form
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     x₂ = (rand-update x₁)
     x₃ = (rand-update x₂)
 #+END_SRC
@@ -250,7 +251,7 @@ then the sequence of values [[file:fig/math/4e7007fd1b5dc307c428f9f0c386469b.svg
 
 We can implement =rand= as a procedure with a local state variable =x= that is initialized to some fixed value =random-init=. Each call to =rand= computes =rand-update= of the current value of =x=, returns this as the random number, and also stores this as the new value of =x=.
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define rand
       (let ((x random-init))
         (lambda () (set! x (rand-update x)) x)))
@@ -262,7 +263,7 @@ The Monte Carlo method consists of choosing sample experiments at random from a 
 
 The heart of our program is a procedure =monte-carlo=, which takes as arguments the number of times to try an experiment, together with the experiment, represented as a no-argument procedure that will return either true or false each time it is run. =Monte-carlo= runs the experiment for the designated number of trials and returns a number telling the fraction of the trials in which the experiment was found to be true.
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define (estimate-pi trials)
       (sqrt (/ 6 (monte-carlo trials
                               cesaro-test))))
@@ -284,7 +285,7 @@ The heart of our program is a procedure =monte-carlo=, which takes as arguments 
 
 Now let us try the same computation using =rand-update= directly rather than =rand=, the way we would be forced to proceed if we did not use assignment to model local state:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define (estimate-pi trials)
       (sqrt (/ 6 (random-gcd-test trials
                                   random-init))))
@@ -321,7 +322,7 @@ It is tempting to conclude this discussion by saying that, by introducing assign
 
   You will find it useful to have a procedure that returns a number chosen at random from a given range. The following =random-in-range= procedure implements this in terms of the =random= procedure used in [[1.2.6]], which returns a nonnegative number less than its input.[fn:3-136]
 
-  #+BEGIN_SRC scheme
+  #+BEGIN_SRC scheme :session sicp
       (define (random-in-range low high)
         (let ((range (- high low)))
           (+ low (random range))))
@@ -342,7 +343,7 @@ So long as we do not use assignments, two evaluations of the same procedure with
 
 To understand how assignment complicates matters, consider a simplified version of the =make-withdraw= procedure of [[3.1.1]] that does not bother to check for an insufficient amount:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define (make-simplified-withdraw balance)
       (lambda (amount)
         (set! balance (- balance amount))
@@ -359,7 +360,7 @@ To understand how assignment complicates matters, consider a simplified version 
 
 Compare this procedure with the following =make-decrementer= procedure, which does not use =set!=:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define (make-decrementer balance)
       (lambda (amount)
         (- balance amount)))
@@ -367,7 +368,7 @@ Compare this procedure with the following =make-decrementer= procedure, which do
 
 =Make-decrementer= returns a procedure that subtracts its input from a designated amount =balance=, but there is no accumulated effect over successive calls, as with =make-simplified-withdraw=:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define D (make-decrementer 25))
 
     (D 20)
@@ -379,19 +380,19 @@ Compare this procedure with the following =make-decrementer= procedure, which do
 
 We can use the substitution model to explain how =make-decrementer= works. For instance, let us analyze the evaluation of the expression
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     ((make-decrementer 25) 20)
 #+END_SRC
 
 We first simplify the operator of the combination by substituting 25 for =balance= in the body of =make-decrementer=. This reduces the expression to
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     ((lambda (amount) (- 25 amount)) 20)
 #+END_SRC
 
 Now we apply the operator by substituting 20 for =amount= in the body of the =lambda= expression:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (- 25 20)
 #+END_SRC
 
@@ -399,13 +400,13 @@ The final answer is 5.
 
 Observe, however, what happens if we attempt a similar substitution analysis with =make-simplified-withdraw=:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     ((make-simplified-withdraw 25) 20)
 #+END_SRC
 
 We first simplify the operator by substituting 25 for =balance= in the body of =make-simplified-withdraw=. This reduces the expression to[fn:3-137]
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     ((lambda (amount)
        (set! balance (- 25 amount)) 25)
      20)
@@ -413,7 +414,7 @@ We first simplify the operator by substituting 25 for =balance= in the body of =
 
 Now we apply the operator by substituting 20 for =amount= in the body of the =lambda= expression:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (set! balance (- 25 20)) 25
 #+END_SRC
 
@@ -428,7 +429,7 @@ The issue surfacing here is more profound than the mere breakdown of a particula
 
 Suppose we call =make-decrementer= twice with the same argument to create two procedures:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define D1 (make-decrementer 25))
     (define D2 (make-decrementer 25))
 #+END_SRC
@@ -437,14 +438,14 @@ Are =D1= and =D2= the same? An acceptable answer is yes, because =D1= and =D2= h
 
 Contrast this with making two calls to =make-simplified-withdraw=:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define W1 (make-simplified-withdraw 25))
     (define W2 (make-simplified-withdraw 25))
 #+END_SRC
 
 Are =W1= and =W2= the same? Surely not, because calls to =W1= and =W2= have distinct effects, as shown by the following sequence of interactions:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (W1 20)
     5
 
@@ -463,14 +464,14 @@ Once we forgo referential transparency, the notion of what it means for computat
 
 As an example of how this issue arises in programming, consider the situation where Peter and Paul have a bank account with $100 in it. There is a substantial difference between modeling this as
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define peter-acc (make-account 100))
     (define paul-acc (make-account 100))
 #+END_SRC
 
 and modeling it as
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define peter-acc (make-account 100))
     (define paul-acc peter-acc)
 #+END_SRC
@@ -484,7 +485,7 @@ With reference to the above remarks on “sameness” and “change,” observe 
 
 In contrast to functional programming, programming that makes extensive use of assignment is known as  /imperative programming/. In addition to raising complications about computational models, programs written in imperative style are susceptible to bugs that cannot occur in functional programs. For example, recall the iterative factorial program from [[1.2.1]]:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define (factorial n)
       (define (iter product counter)
         (if (> counter n)
@@ -496,7 +497,7 @@ In contrast to functional programming, programming that makes extensive use of a
 
 Instead of passing arguments in the internal iterative loop, we could adopt a more imperative style by using explicit assignment to update the values of the variables =product= and =counter=:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define (factorial n)
       (let ((product 1)
             (counter 1))
@@ -512,7 +513,7 @@ Instead of passing arguments in the internal iterative loop, we could adopt a mo
 
 This does not change the results produced by the program, but it does introduce a subtle trap. How do we decide the order of the assignments? As it happens, the program is correct as written. But writing the assignments in the opposite order
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (set! counter (+ counter 1))
     (set! product (* counter product))
 #+END_SRC
@@ -524,7 +525,7 @@ The complexity of imperative programs becomes even worse if we consider applicat
 #+BEGIN_QUOTE
   *Exercise 3.7:* Consider the bank account objects created by =make-account=, with the password modification described in [[Exercise 3.3]]. Suppose that our banking system requires the ability to make joint accounts. Define a procedure =make-joint= that accomplishes this. =Make-joint= should take three arguments. The first is a password-protected account. The second argument must match the password with which the account was defined in order for the =make-joint= operation to proceed. The third argument is a new password. =Make-joint= is to create an additional access to the original account using the new password. For example, if =peter-acc= is a bank account with password =open-sesame=, then
 
-  #+BEGIN_SRC scheme
+  #+BEGIN_SRC scheme :session sicp
       (define paul-acc
         (make-joint peter-acc
                     'open-sesame
@@ -537,7 +538,7 @@ The complexity of imperative programs becomes even worse if we consider applicat
 #+BEGIN_QUOTE
   *Exercise 3.8:* When we defined the evaluation model in [[1.1.3]], we said that the first step in evaluating an expression is to evaluate its subexpressions. But we never specified the order in which the subexpressions should be evaluated (e.g., left to right or right to left). When we introduce assignment, the order in which the arguments to a procedure are evaluated can make a difference to the result. Define a simple procedure =f= such that evaluating
 
-  #+BEGIN_SRC scheme
+  #+BEGIN_SRC scheme :session sicp
       (+ (f 0) (f 1))
   #+END_SRC
 
@@ -602,14 +603,14 @@ The environment model of evaluation replaces the substitution model in specifyin
 
 In the environment model of evaluation, a procedure is always a pair consisting of some code and a pointer to an environment. Procedures are created in one way only: by evaluating a λ-expression. This produces a procedure whose code is obtained from the text of the λ-expression and whose environment is the environment in which the λ-expression was evaluated to produce the procedure. For example, consider the procedure definition
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define (square x)
       (* x x))
 #+END_SRC
 
 evaluated in the global environment. The procedure definition syntax is just syntactic sugar for an underlying implicit λ-expression. It would have been equivalent to have used
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define square
       (lambda (x) (* x x)))
 #+END_SRC
@@ -643,7 +644,7 @@ These evaluation rules, though considerably more complex than the substitution m
 
 When we introduced the substitution model in [[1.1.5]] we showed how the combination =(f 5)= evaluates to 136, given the following procedure definitions:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define (square x)
       (* x x))
     (define (sum-of-squares x y)
@@ -659,7 +660,7 @@ We can analyze the same example using the environment model. [[Figure 3.4]] show
 
 In [[Figure 3.5]] we see the environment structure created by evaluating the expression =(f 5)=. The call to =f= creates a new environment E1 beginning with a frame in which =a=, the formal parameter of =f=, is bound to the argument 5. In E1, we evaluate the body of =f=:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (sum-of-squares (+ a 1) (* a 2))
 #+END_SRC
 
@@ -677,7 +678,7 @@ After the subexpressions are evaluated, the results are returned. The values gen
 #+BEGIN_QUOTE
   *Exercise 3.9:* In [[1.2.1]] we used the substitution model to analyze two procedures for computing factorials, a recursive version
 
-  #+BEGIN_SRC scheme
+  #+BEGIN_SRC scheme :session sicp
       (define (factorial n)
         (if (= n 1)
             1
@@ -686,7 +687,7 @@ After the subexpressions are evaluated, the results are returned. The values gen
 
   and an iterative version
 
-  #+BEGIN_SRC scheme
+  #+BEGIN_SRC scheme :session sicp
       (define (factorial n)
         (fact-iter 1 1 n))
 
@@ -709,7 +710,7 @@ After the subexpressions are evaluated, the results are returned. The values gen
 
 We can turn to the environment model to see how procedures and assignment can be used to represent objects with local state. As an example, consider the “withdrawal processor” from [[3.1.1]] created by calling the procedure
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define (make-withdraw balance)
       (lambda (amount)
         (if (>= balance amount)
@@ -721,13 +722,13 @@ We can turn to the environment model to see how procedures and assignment can be
 
 Let us describe the evaluation of
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define W1 (make-withdraw 100))
 #+END_SRC
 
 followed by
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (W1 50)
     50
 #+END_SRC
@@ -739,7 +740,7 @@ followed by
 
 The interesting part of the computation happens when we apply the procedure =make-withdraw= to an argument:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define W1 (make-withdraw 100))
 #+END_SRC
 
@@ -750,14 +751,14 @@ We begin, as usual, by setting up an environment E1 in which the formal paramete
 
 Now we can analyze what happens when =W1= is applied to an argument:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (W1 50)
     50
 #+END_SRC
 
 We begin by constructing a frame in which =amount=, the formal parameter of =W1=, is bound to the argument 50. The crucial point to observe is that this frame has as its enclosing environment not the global environment, but rather the environment E1, because this is the environment that is specified by the =W1= procedure object. Within this new environment, we evaluate the body of the procedure:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (if (>= balance amount)
         (begin (set! balance (- balance amount))
                balance)
@@ -776,7 +777,7 @@ When the =set!= is executed, the binding of =balance= in E1 is changed. At the c
 
 Observe what happens when we create a second “withdraw” object by making another call to =make-withdraw=:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define W2 (make-withdraw 100))
 #+END_SRC
 
@@ -788,7 +789,7 @@ This produces the environment structure of [[Figure 3.10]], which shows that =W2
 #+BEGIN_QUOTE
   *Exercise 3.10:* In the =make-withdraw= procedure, the local variable =balance= is created as a parameter of =make-withdraw=. We could also create the local state variable explicitly, using =let=, as follows:
 
-  #+BEGIN_SRC scheme
+  #+BEGIN_SRC scheme :session sicp
       (define (make-withdraw initial-amount)
         (let ((balance initial-amount))
           (lambda (amount)
@@ -801,19 +802,19 @@ This produces the environment structure of [[Figure 3.10]], which shows that =W2
 
   Recall from [[1.3.2]] that =let= is simply syntactic sugar for a procedure call:
 
-  #+BEGIN_SRC scheme
+  #+BEGIN_SRC scheme :session sicp
       (let ((⟨var⟩ ⟨exp⟩)) ⟨body⟩)
   #+END_SRC
 
   is interpreted as an alternate syntax for
 
-  #+BEGIN_SRC scheme
+  #+BEGIN_SRC scheme :session sicp
       ((lambda (⟨var⟩) ⟨body⟩) ⟨exp⟩)
   #+END_SRC
 
   Use the environment model to analyze this alternate version of =make-withdraw=, drawing figures like the ones above to illustrate the interactions
 
-  #+BEGIN_SRC scheme
+  #+BEGIN_SRC scheme :session sicp
       (define W1 (make-withdraw 100))
       (W1 50)
       (define W2 (make-withdraw 100))
@@ -828,7 +829,7 @@ This produces the environment structure of [[Figure 3.10]], which shows that =W2
 
 Section [[1.1.8]] introduced the idea that procedures can have internal definitions, thus leading to a block structure as in the following procedure to compute square roots:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define (sqrt x)
       (define (good-enough? guess)
         (< (abs (- (square guess) x)) 0.001))
@@ -848,7 +849,7 @@ Now we can use the environment model to see why these internal definitions behav
 
 Observe the structure of the environment. =Sqrt= is a symbol in the global environment that is bound to a procedure object whose associated environment is the global environment. When =sqrt= was called, a new environment E1 was formed, subordinate to the global environment, in which the parameter =x= is bound to 2. The body of =sqrt= was then evaluated in E1. Since the first expression in the body of =sqrt= is
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define (good-enough? guess)
       (< (abs (- (square guess) x)) 0.001))
 #+END_SRC
@@ -865,7 +866,7 @@ The environment model thus explains the two key properties that make local proce
 #+BEGIN_QUOTE
   *Exercise 3.11:* In [[3.2.3]] we saw how the environment model described the behavior of procedures with local state. Now we have seen how internal definitions work. A typical message-passing procedure contains both of these aspects. Consider the bank account procedure of [[3.1.1]]:
 
-  #+BEGIN_SRC scheme
+  #+BEGIN_SRC scheme :session sicp
       (define (make-account balance)
         (define (withdraw amount)
           (if (>= balance amount)
@@ -888,7 +889,7 @@ The environment model thus explains the two key properties that make local proce
 
   Show the environment structure generated by the sequence of interactions
 
-  #+BEGIN_SRC scheme
+  #+BEGIN_SRC scheme :session sicp
       (define acc (make-account 50))
 
       ((acc 'deposit) 40)
@@ -900,7 +901,7 @@ The environment model thus explains the two key properties that make local proce
 
   Where is the local state for =acc= kept? Suppose we define another account
 
-  #+BEGIN_SRC scheme
+  #+BEGIN_SRC scheme :session sicp
       (define acc2 (make-account 100))
   #+END_SRC
 
@@ -922,7 +923,7 @@ The environment model thus explains the two key properties that make local proce
 
 [[Chapter 2]] dealt with compound data as a means for constructing computational objects that have several parts, in order to model real-world objects that have several aspects. In that chapter we introduced the discipline of data abstraction, according to which data structures are specified in terms of constructors, which create data objects, and selectors, which access the parts of compound data objects. But we now know that there is another aspect of data that chapter 2 did not address. The desire to model systems composed of objects that have changing state leads us to the need to modify compound data objects, as well as to construct and select from them. In order to model compound objects with changing state, we will design data abstractions to include, in addition to selectors and constructors, operations called  /mutators/, which modify data objects. For instance, modeling a banking system requires us to change account balances. Thus, a data structure for representing bank accounts might admit an operation
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (set-balance! ⟨account⟩ ⟨new-value⟩)
 #+END_SRC
 
@@ -958,7 +959,7 @@ The =set-cdr!= operation is similar to =set-car!=. The only difference is that t
 
 =Cons= builds new list structure by creating new pairs, while =set-car!= and =set-cdr!= modify existing pairs. Indeed, we could implement =cons= in terms of the two mutators, together with a procedure =get-new-pair=, which returns a new pair that is not part of any existing list structure. We obtain the new pair, set its =car= and =cdr= pointers to the designated objects, and return the new pair as the result of the =cons=.[fn:3-146]
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define (cons x y)
       (let ((new (get-new-pair)))
         (set-car! new x)
@@ -969,7 +970,7 @@ The =set-cdr!= operation is similar to =set-car!=. The only difference is that t
 #+BEGIN_QUOTE
   *Exercise 3.12:* The following procedure for appending lists was introduced in [[2.2.1]]:
 
-  #+BEGIN_SRC scheme
+  #+BEGIN_SRC scheme :session sicp
       (define (append x y)
         (if (null? x)
             y
@@ -978,7 +979,7 @@ The =set-cdr!= operation is similar to =set-car!=. The only difference is that t
 
   =Append= forms a new list by successively =cons=ing the elements of =x= onto =y=. The procedure =append!= is similar to =append=, but it is a mutator rather than a constructor. It appends the lists by splicing them together, modifying the final pair of =x= so that its =cdr= is now =y=. (It is an error to call =append!= with an empty =x=.)
 
-  #+BEGIN_SRC scheme
+  #+BEGIN_SRC scheme :session sicp
       (define (append! x y)
         (set-cdr! (last-pair x) y)
         x)
@@ -986,7 +987,7 @@ The =set-cdr!= operation is similar to =set-car!=. The only difference is that t
 
   Here =last-pair= is a procedure that returns the last pair in its argument:
 
-  #+BEGIN_SRC scheme
+  #+BEGIN_SRC scheme :session sicp
       (define (last-pair x)
         (if (null? (cdr x))
             x
@@ -995,7 +996,7 @@ The =set-cdr!= operation is similar to =set-car!=. The only difference is that t
 
   Consider the interaction
 
-  #+BEGIN_SRC scheme
+  #+BEGIN_SRC scheme :session sicp
       (define x (list 'a 'b))
       (define y (list 'c 'd))
       (define z (append x y))
@@ -1021,7 +1022,7 @@ The =set-cdr!= operation is similar to =set-car!=. The only difference is that t
 #+BEGIN_QUOTE
   *Exercise 3.13:* Consider the following =make-cycle= procedure, which uses the =last-pair= procedure defined in [[Exercise 3.12]]:
 
-  #+BEGIN_SRC scheme
+  #+BEGIN_SRC scheme :session sicp
       (define (make-cycle x)
         (set-cdr! (last-pair x) x)
         x)
@@ -1029,7 +1030,7 @@ The =set-cdr!= operation is similar to =set-car!=. The only difference is that t
 
   Draw a box-and-pointer diagram that shows the structure =z= created by
 
-  #+BEGIN_SRC scheme
+  #+BEGIN_SRC scheme :session sicp
       (define z (make-cycle (list 'a 'b 'c)))
   #+END_SRC
 
@@ -1039,7 +1040,7 @@ The =set-cdr!= operation is similar to =set-car!=. The only difference is that t
 #+BEGIN_QUOTE
   *Exercise 3.14:* The following procedure is quite useful, although obscure:
 
-  #+BEGIN_SRC scheme
+  #+BEGIN_SRC scheme :session sicp
       (define (mystery x)
         (define (loop x y)
           (if (null? x)
@@ -1059,7 +1060,7 @@ The =set-cdr!= operation is similar to =set-car!=. The only difference is that t
 
 We mentioned in [[3.1.3]] the theoretical issues of “sameness” and “change” raised by the introduction of assignment. These issues arise in practice when individual pairs are  /shared/ among different data objects. For example, consider the structure formed by
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define x (list 'a 'b))
     (define z1 (cons x x))
 #+END_SRC
@@ -1071,7 +1072,7 @@ As shown in [[Figure 3.16]], =z1= is a pair whose =car= and =cdr= both point to 
 
 In contrast to [[Figure 3.16]], [[Figure 3.17]] shows the structure created by
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define z2
       (cons (list 'a 'b) (list 'a 'b)))
 #+END_SRC
@@ -1083,7 +1084,7 @@ In this structure, the pairs in the two =(a b)= lists are distinct, although the
 
 When thought of as a list, =z1= and =z2= both represent “the same” list, =((a b) a b)=. In general, sharing is completely undetectable if we operate on lists using only =cons=, =car=, and =cdr=. However, if we allow mutators on list structure, sharing becomes significant. As an example of the difference that sharing can make, consider the following procedure, which modifies the =car= of the structure to which it is applied:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define (set-to-wow! x)
       (set-car! (car x) 'wow)
       x)
@@ -1091,7 +1092,7 @@ When thought of as a list, =z1= and =z2= both represent “the same” list, =((
 
 Even though =z1= and =z2= are “the same” structure, applying =set-to-wow!= to them yields different results. With =z1=, altering the =car= also changes the =cdr=, because in =z1= the =car= and the =cdr= are the same pair. With =z2=, the =car= and =cdr= are distinct, so =set-to-wow!= modifies only the =car=:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     z1
     ((a b) a b)
 
@@ -1116,7 +1117,7 @@ As will be seen in the following sections, we can exploit sharing to greatly ext
 #+BEGIN_QUOTE
   *Exercise 3.16:* Ben Bitdiddle decides to write a procedure to count the number of pairs in any list structure. “It's easy,” he reasons. “The number of pairs in any structure is the number in the =car= plus the number in the =cdr= plus one more to count the current pair.” So Ben writes the following procedure:
 
-  #+BEGIN_SRC scheme
+  #+BEGIN_SRC scheme :session sicp
       (define (count-pairs x)
         (if (not (pair? x))
             0
@@ -1146,7 +1147,7 @@ As will be seen in the following sections, we can exploit sharing to greatly ext
 
 When we introduced compound data, we observed in [[2.1.3]] that pairs can be represented purely in terms of procedures:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define (cons x y)
       (define (dispatch m)
         (cond ((eq? m 'car) x)
@@ -1161,7 +1162,7 @@ When we introduced compound data, we observed in [[2.1.3]] that pairs can be rep
 
 The same observation is true for mutable data. We can implement mutable data objects as procedures using assignment and local state. For instance, we can extend the above pair implementation to handle =set-car!= and =set-cdr!= in a manner analogous to the way we implemented bank accounts using =make-account= in [[3.1.1]]:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define (cons x y)
       (define (set-x! v) (set! x v))
       (define (set-y! v) (set! y v))
@@ -1191,7 +1192,7 @@ Assignment is all that is needed, theoretically, to account for the behavior of 
 #+BEGIN_QUOTE
   *Exercise 3.20:* Draw environment diagrams to illustrate the evaluation of the sequence of expressions
 
-  #+BEGIN_SRC scheme
+  #+BEGIN_SRC scheme :session sicp
       (define x (cons 1 2))
       (define z (cons x x))
 
@@ -1220,13 +1221,13 @@ In terms of data abstraction, we can regard a queue as defined by the following 
 - a constructor: =(make-queue)= returns an empty queue (a queue containing no items).
 - two selectors:
 
-  #+BEGIN_SRC scheme
+  #+BEGIN_SRC scheme :session sicp
       (empty-queue? ⟨queue⟩)
   #+END_SRC
 
   tests if the queue is empty.
 
-  #+BEGIN_SRC scheme
+  #+BEGIN_SRC scheme :session sicp
       (front-queue ⟨queue⟩)
   #+END_SRC
 
@@ -1234,13 +1235,13 @@ In terms of data abstraction, we can regard a queue as defined by the following 
 
 - two mutators:
 
-  #+BEGIN_SRC scheme
+  #+BEGIN_SRC scheme :session sicp
       (insert-queue! ⟨queue⟩ ⟨item⟩)
   #+END_SRC
 
   inserts the item at the rear of the queue and returns the modified queue as its value.
 
-  #+BEGIN_SRC scheme
+  #+BEGIN_SRC scheme :session sicp
       (delete-queue! ⟨queue⟩)
   #+END_SRC
 
@@ -1257,7 +1258,7 @@ A queue is represented, then, as a pair of pointers, =front-ptr= and =rear-ptr=,
 
 To define the queue operations we use the following procedures, which enable us to select and to modify the front and rear pointers of a queue:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define (front-ptr queue) (car queue))
     (define (rear-ptr queue) (cdr queue))
     (define (set-front-ptr! queue item)
@@ -1268,20 +1269,20 @@ To define the queue operations we use the following procedures, which enable us 
 
 Now we can implement the actual queue operations. We will consider a queue to be empty if its front pointer is the empty list:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define (empty-queue? queue)
       (null? (front-ptr queue)))
 #+END_SRC
 
 The =make-queue= constructor returns, as an initially empty queue, a pair whose =car= and =cdr= are both the empty list:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define (make-queue) (cons '() '()))
 #+END_SRC
 
 To select the item at the front of the queue, we return the =car= of the pair indicated by the front pointer:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define (front-queue queue)
       (if (empty-queue? queue)
           (error "FRONT called with an
@@ -1294,7 +1295,7 @@ To insert an item in a queue, we follow the method whose result is indicated in 
 #+NAME: *Figure 3.20:* Result of using =(insert-queue! q 'd)= on the queue of [[Figure 3.19]].
 [[file:fig/chap3/Fig3.20c.std.svg]]
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define (insert-queue! queue item)
       (let ((new-pair (cons item '())))
         (cond ((empty-queue? queue)
@@ -1309,7 +1310,7 @@ To insert an item in a queue, we follow the method whose result is indicated in 
 
 To delete the item at the front of the queue, we merely modify the front pointer so that it now points at the second item in the queue, which can be found by following the =cdr= pointer of the first item (see [[Figure 3.21]]):[fn:3-150]
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define (delete-queue! queue)
       (cond ((empty-queue? queue)
              (error "DELETE! called with
@@ -1326,7 +1327,7 @@ To delete the item at the front of the queue, we merely modify the front pointer
 #+BEGIN_QUOTE
   *Exercise 3.21:* Ben Bitdiddle decides to test the queue implementation described above. He types in the procedures to the Lisp interpreter and proceeds to try them out:
 
-  #+BEGIN_SRC scheme
+  #+BEGIN_SRC scheme :session sicp
       (define q1 (make-queue))
 
       (insert-queue! q1 'a)
@@ -1348,7 +1349,7 @@ To delete the item at the front of the queue, we merely modify the front pointer
 #+BEGIN_QUOTE
   *Exercise 3.22:* Instead of representing a queue as a pair of pointers, we can build a queue as a procedure with local state. The local state will consist of pointers to the beginning and the end of an ordinary list. Thus, the =make-queue= procedure will have the form
 
-  #+BEGIN_SRC scheme
+  #+BEGIN_SRC scheme :session sicp
       (define (make-queue)
         (let ((front-ptr … )
               (rear-ptr … ))
@@ -1372,7 +1373,7 @@ When we studied various ways of representing sets in [[Chapter 2]], we mentioned
 
 We first consider a one-dimensional table, in which each value is stored under a single key. We implement the table as a list of records, each of which is implemented as a pair consisting of a key and the associated value. The records are glued together to form a list by pairs whose =car=s point to successive records. These gluing pairs are called the  /backbone/ of the table. In order to have a place that we can change when we add a new record to the table, we build the table as a  /headed list/. A headed list has a special backbone pair at the beginning, which holds a dummy “record”---in this case the arbitrarily chosen symbol =*table*=. [[Figure 3.22]] shows the box-and-pointer diagram for the table
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     a:  1
     b:  2
     c:  3
@@ -1383,7 +1384,7 @@ We first consider a one-dimensional table, in which each value is stored under a
 
 To extract information from a table we use the =lookup= procedure, which takes a key as argument and returns the associated value (or false if there is no value stored under that key). =Lookup= is defined in terms of the =assoc= operation, which expects a key and a list of records as arguments. Note that =assoc= never sees the dummy record. =Assoc= returns the record that has the given key as its =car=.[fn:3-152] =Lookup= then checks to see that the resulting record returned by =assoc= is not false, and returns the value (the =cdr=) of the record.
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define (lookup key table)
       (let ((record (assoc key (cdr table))))
         (if record
@@ -1399,7 +1400,7 @@ To extract information from a table we use the =lookup= procedure, which takes a
 
 To insert a value in a table under a specified key, we first use =assoc= to see if there is already a record in the table with this key. If not, we form a new record by =cons=ing the key with the value, and insert this at the head of the table's list of records, after the dummy record. If there already is a record with this key, we set the =cdr= of this record to the designated new value. The header of the table provides us with a fixed location to modify in order to insert the new record.[fn:3-153]
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define (insert! key value table)
       (let ((record (assoc key (cdr table))))
         (if record
@@ -1412,7 +1413,7 @@ To insert a value in a table under a specified key, we first use =assoc= to see 
 
 To construct a new table, we simply create a list containing the symbol =*table*=:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define (make-table)
       (list '*table*))
 #+END_SRC
@@ -1436,7 +1437,7 @@ which has two subtables. (The subtables don't need a special header symbol, sinc
 
 When we look up an item, we use the first key to identify the correct subtable. Then we use the second key to identify the record within the subtable.
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define (lookup key-1 key-2 table)
       (let ((subtable (assoc key-1 (cdr table))))
         (if subtable
@@ -1448,7 +1449,7 @@ When we look up an item, we use the first key to identify the correct subtable. 
 
 To insert a new item under a pair of keys, we use =assoc= to see if there is a subtable stored under the first key. If not, we build a new subtable containing the single record (=key-2=, =value=) and insert it into the table under the first key. If a subtable already exists for the first key, we insert the new record into this subtable, using the insertion method for one-dimensional tables described above:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define (insert! key-1 key-2 value table)
       (let ((subtable (assoc key-1 (cdr table))))
         (if subtable
@@ -1473,7 +1474,7 @@ To insert a new item under a pair of keys, we use =assoc= to see if there is a s
 
 The =lookup= and =insert!= operations defined above take the table as an argument. This enables us to use programs that access more than one table. Another way to deal with multiple tables is to have separate =lookup= and =insert!= procedures for each table. We can do this by representing a table procedurally, as an object that maintains an internal table as part of its local state. When sent an appropriate message, this “table object” supplies the procedure with which to operate on the internal table. Here is a generator for two-dimensional tables represented in this fashion:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define (make-table)
       (let ((local-table (list '*table*)))
         (define (lookup key-1 key-2)
@@ -1514,7 +1515,7 @@ The =lookup= and =insert!= operations defined above take the table as an argumen
 
 Using =make-table=, we could implement the =get= and =put= operations used in [[2.4.3]] for data-directed programming, as follows:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define operation-table (make-table))
     (define get (operation-table 'lookup-proc))
     (define put (operation-table 'insert-proc!))
@@ -1537,7 +1538,7 @@ Using =make-table=, we could implement the =get= and =put= operations used in [[
 #+BEGIN_QUOTE
   *Exercise 3.27:*  /Memoization/ (also called  /tabulation/) is a technique that enables a procedure to record, in a local table, values that have previously been computed. This technique can make a vast difference in the performance of a program. A memoized procedure maintains a table in which values of previous calls are stored using as keys the arguments that produced the values. When the memoized procedure is asked to compute a value, it first checks the table to see if the value is already there and, if so, just returns that value. Otherwise, it computes the new value in the ordinary way and stores this in the table. As an example of memoization, recall from [[1.2.2]] the exponential process for computing Fibonacci numbers:
 
-  #+BEGIN_SRC scheme
+  #+BEGIN_SRC scheme :session sicp
       (define (fib n)
         (cond ((= n 0) 0)
               ((= n 1) 1)
@@ -1547,7 +1548,7 @@ Using =make-table=, we could implement the =get= and =put= operations used in [[
 
   The memoized version of the same procedure is
 
-  #+BEGIN_SRC scheme
+  #+BEGIN_SRC scheme :session sicp
       (define memo-fib
         (memoize
          (lambda (n)
@@ -1560,7 +1561,7 @@ Using =make-table=, we could implement the =get= and =put= operations used in [[
 
   where the memoizer is defined as
 
-  #+BEGIN_SRC scheme
+  #+BEGIN_SRC scheme :session sicp
       (define (memoize f)
         (let ((table (make-table)))
           (lambda (x)
@@ -1595,7 +1596,7 @@ We will now build a program for modeling the digital logic circuits we wish to s
 
 One basic element of our simulation will be a procedure =make-wire=, which constructs wires. For example, we can construct six wires as follows:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define a (make-wire))
     (define b (make-wire))
     (define c (make-wire))
@@ -1606,7 +1607,7 @@ One basic element of our simulation will be a procedure =make-wire=, which const
 
 We attach a function box to a set of wires by calling a procedure that constructs that kind of box. The arguments to the constructor procedure are the wires to be attached to the box. For example, given that we can construct and-gates, or-gates, and inverters, we can wire together the half-adder shown in [[Figure 3.25]]:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (or-gate a b d)
     ok
 
@@ -1622,7 +1623,7 @@ We attach a function box to a set of wires by calling a procedure that construct
 
 Better yet, we can explicitly name this operation by defining a procedure =half-adder= that constructs this circuit, given the four external wires to be attached to the half-adder:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define (half-adder a b s c)
       (let ((d (make-wire)) (e (make-wire)))
         (or-gate a b d)
@@ -1634,7 +1635,7 @@ Better yet, we can explicitly name this operation by defining a procedure =half-
 
 The advantage of making this definition is that we can use =half-adder= itself as a building block in creating more complex circuits. [[Figure 3.26]], for example, shows a  /full-adder/ composed of two half-adders and an or-gate.[fn:3-154] We can construct a full-adder as follows:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define (full-adder a b c-in sum c-out)
       (let ((c1 (make-wire))
             (c2 (make-wire))
@@ -1674,7 +1675,7 @@ In addition, we will make use of a procedure =after-delay= that takes a time del
 
 Using these procedures, we can define the primitive digital logic functions. To connect an input to an output through an inverter, we use =add-action!= to associate with the input wire a procedure that will be run whenever the signal on the input wire changes value. The procedure computes the =logical-not= of the input signal, and then, after one =inverter-delay=, sets the output signal to be this new value:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define (inverter input output)
       (define (invert-input)
         (let ((new-value
@@ -1694,7 +1695,7 @@ Using these procedures, we can define the primitive digital logic functions. To 
 
 An and-gate is a little more complex. The action procedure must be run if either of the inputs to the gate changes. It computes the =logical-and= (using a procedure analogous to =logical-not=) of the values of the signals on the input wires and sets up a change to the new value to occur on the output wire after one =and-gate-delay=.
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define (and-gate a1 a2 output)
       (define (and-action-procedure)
         (let ((new-value
@@ -1730,7 +1731,7 @@ An and-gate is a little more complex. The action procedure must be run if either
 
 A wire in our simulation will be a computational object with two local state variables: a =signal-value= (initially taken to be 0) and a collection of =action-procedures= to be run when the signal changes value. We implement the wire, using message-passing style, as a collection of local procedures together with a =dispatch= procedure that selects the appropriate local operation, just as we did with the simple bank-account object in [[3.1.1]]:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define (make-wire)
       (let ((signal-value 0)
             (action-procedures '()))
@@ -1758,7 +1759,7 @@ A wire in our simulation will be a computational object with two local state var
 
 The local procedure =set-my-signal!= tests whether the new signal value changes the signal on the wire. If so, it runs each of the action procedures, using the following procedure =call-each=, which calls each of the items in a list of no-argument procedures:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define (call-each procedures)
       (if (null? procedures)
           'done
@@ -1770,7 +1771,7 @@ The local procedure =accept-action-procedure!= adds the given procedure to the l
 
 With the local =dispatch= procedure set up as specified, we can provide the following procedures to access the local operations on wires:[fn:3-155]
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define (get-signal wire)
       (wire 'get-signal))
     (define (set-signal! wire new-value)
@@ -1798,7 +1799,7 @@ The only thing needed to complete the simulator is =after-delay=. The idea here 
 
 The particular agenda that we use is denoted by =the-agenda=. The procedure =after-delay= adds new elements to =the-agenda=:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define (after-delay delay action)
       (add-to-agenda!
        (+ delay (current-time the-agenda))
@@ -1808,7 +1809,7 @@ The particular agenda that we use is denoted by =the-agenda=. The procedure =aft
 
 The simulation is driven by the procedure =propagate=, which operates on =the-agenda=, executing each procedure on the agenda in sequence. In general, as the simulation runs, new items will be added to the agenda, and =propagate= will continue the simulation as long as there are items on the agenda:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define (propagate)
       (if (empty-agenda? the-agenda)
           'done
@@ -1825,7 +1826,7 @@ The simulation is driven by the procedure =propagate=, which operates on =the-ag
 
 The following procedure, which places a “probe” on a wire, shows the simulator in action. The probe tells the wire that, whenever its signal changes value, it should print the new signal value, together with the current time and a name that identifies the wire:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define (probe name wire)
       (add-action!
        wire
@@ -1840,7 +1841,7 @@ The following procedure, which places a “probe” on a wire, shows the simulat
 
 We begin by initializing the agenda and specifying delays for the primitive function boxes:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define the-agenda (make-agenda))
     (define inverter-delay 2)
     (define and-gate-delay 3)
@@ -1849,7 +1850,7 @@ We begin by initializing the agenda and specifying delays for the primitive func
 
 Now we define four wires, placing probes on two of them:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define input-1 (make-wire))
     (define input-2 (make-wire))
     (define sum (make-wire))
@@ -1864,7 +1865,7 @@ Now we define four wires, placing probes on two of them:
 
 Next we connect the wires in a half-adder circuit (as in [[Figure 3.25]]), set the signal on =input-1= to 1, and run the simulation:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (half-adder input-1 input-2 sum carry)
     ok
 
@@ -1878,7 +1879,7 @@ Next we connect the wires in a half-adder circuit (as in [[Figure 3.25]]), set t
 
 The =sum= signal changes to 1 at time 8. We are now eight time units from the beginning of the simulation. At this point, we can set the signal on =input-2= to 1 and allow the values to propagate:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (set-signal! input-2 1)
     done
 
@@ -1893,7 +1894,7 @@ The =carry= changes to 1 at time 11 and the =sum= changes to 0 at time 16.
 #+BEGIN_QUOTE
   *Exercise 3.31:* The internal procedure =accept-action-procedure!= defined in =make-wire= specifies that when a new action procedure is added to a wire, the procedure is immediately run. Explain why this initialization is necessary. In particular, trace through the half-adder example in the paragraphs above and say how the system's response would differ if we had defined =accept-action-procedure!= as
 
-  #+BEGIN_SRC scheme
+  #+BEGIN_SRC scheme :session sicp
       (define (accept-action-procedure! proc)
         (set! action-procedures
               (cons proc action-procedures)))
@@ -1909,7 +1910,7 @@ Finally, we give details of the agenda data structure, which holds the procedure
 
 The agenda is made up of  /time segments/. Each time segment is a pair consisting of a number (the time) and a queue (see [[Exercise 3.32]]) that holds the procedures that are scheduled to be run during that time segment.
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define (make-time-segment time queue)
       (cons time queue))
     (define (segment-time s) (car s))
@@ -1920,7 +1921,7 @@ We will operate on the time-segment queues using the queue operations described 
 
 The agenda itself is a one-dimensional table of time segments. It differs from the tables described in [[3.3.3]] in that the segments will be sorted in order of increasing time. In addition, we store the  /current time/ (i.e., the time of the last action that was processed) at the head of the agenda. A newly constructed agenda has no time segments and has a current time of 0:[fn:3-156]
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define (make-agenda) (list 0))
     (define (current-time agenda) (car agenda))
     (define (set-current-time! agenda time)
@@ -1936,14 +1937,14 @@ The agenda itself is a one-dimensional table of time segments. It differs from t
 
 An agenda is empty if it has no time segments:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define (empty-agenda? agenda)
       (null? (segments agenda)))
 #+END_SRC
 
 To add an action to an agenda, we first check if the agenda is empty. If so, we create a time segment for the action and install this in the agenda. Otherwise, we scan the agenda, examining the time of each segment. If we find a segment for our appointed time, we add the action to the associated queue. If we reach a time later than the one to which we are appointed, we insert a new time segment into the agenda just before it. If we reach the end of the agenda, we must create a new time segment at the end.
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define (add-to-agenda! time action agenda)
       (define (belongs-before? segments)
         (or (null? segments)
@@ -1980,7 +1981,7 @@ To add an action to an agenda, we first check if the agenda is empty. If so, we 
 
 The procedure that removes the first item from the agenda deletes the item at the front of the queue in the first time segment. If this deletion makes the time segment empty, we remove it from the list of segments:[fn:3-157]
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define (remove-first-agenda-item! agenda)
       (let ((q (segment-queue
                 (first-segment agenda))))
@@ -1993,7 +1994,7 @@ The procedure that removes the first item from the agenda deletes the item at th
 
 The first agenda item is found at the head of the queue in the first time segment. Whenever we extract an item, we also update the current time:[fn:3-158]
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define (first-agenda-item agenda)
       (if (empty-agenda? agenda)
           (error "Agenda is empty:
@@ -2032,7 +2033,7 @@ Computation by such a network proceeds as follows: When a connector is given a v
 
 To use the constraint system to carry out the temperature computation outlined above, we first create two connectors, =C= and =F=, by calling the constructor =make-connector=, and link =C= and =F= in an appropriate network:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define C (make-connector))
     (define F (make-connector))
     (celsius-fahrenheit-converter C F)
@@ -2041,7 +2042,7 @@ To use the constraint system to carry out the temperature computation outlined a
 
 The procedure that creates the network is defined as follows:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define (celsius-fahrenheit-converter c f)
       (let ((u (make-connector))
             (v (make-connector))
@@ -2061,14 +2062,14 @@ This procedure creates the internal connectors =u=, =v=, =w=, =x=, and =y=, and 
 
 To watch the network in action, we can place probes on the connectors =C= and =F=, using a =probe= procedure similar to the one we used to monitor wires in [[3.3.4]]. Placing a probe on a connector will cause a message to be printed whenever the connector is given a value:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (probe "Celsius temp" C)
     (probe "Fahrenheit temp" F)
 #+END_SRC
 
 Next we set the value of =C= to 25. (The third argument to =set-value!= tells =C= that this directive comes from the =user=.)
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (set-value! C 25 'user)
     Probe: Celsius temp = 25
     Probe: Fahrenheit temp = 77
@@ -2079,14 +2080,14 @@ The probe on =C= awakens and reports the value. =C= also propagates its value th
 
 Now we can try to set =F= to a new value, say 212:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (set-value! F 212 'user)
     Error! Contradiction (77 212)
 #+END_SRC
 
 The connector complains that it has sensed a contradiction: Its value is 77, and someone is trying to set it to 212. If we really want to reuse the network with new values, we can tell =C= to forget its old value:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (forget-value! C 'user)
     Probe: Celsius temp = ?
     Probe: Fahrenheit temp = ?
@@ -2097,7 +2098,7 @@ The connector complains that it has sensed a contradiction: Its value is 77, and
 
 Now that =F= has no value, we are free to set it to 212:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (set-value! F 212 'user)
     Probe: Fahrenheit temp = 212
     Probe: Celsius temp = 100
@@ -2124,7 +2125,7 @@ The connectors communicate with the constraints by means of the procedures =info
 
 =Adder= constructs an adder constraint among summand connectors =a1= and =a2= and a =sum= connector. An adder is implemented as a procedure with local state (the procedure =me= below):
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define (adder a1 a2 sum)
       (define (process-new-value)
         (cond ((and (has-value? a1)
@@ -2165,7 +2166,7 @@ The connectors communicate with the constraints by means of the procedures =info
 
 =Adder= connects the new adder to the designated connectors and returns it as its value. The procedure =me=, which represents the adder, acts as a dispatch to the local procedures. The following “syntax interfaces” (see [[Footnote 155]] in [[3.3.4]]) are used in conjunction with the dispatch:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define (inform-about-value constraint)
       (constraint 'I-have-a-value))
     (define (inform-about-no-value constraint)
@@ -2176,7 +2177,7 @@ The adder's local procedure =process-new-value= is called when the adder is info
 
 A multiplier is very similar to an adder. It will set its =product= to 0 if either of the factors is 0, even if the other factor is not known.
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define (multiplier m1 m2 product)
       (define (process-new-value)
         (cond ((or (and (has-value? m1)
@@ -2224,7 +2225,7 @@ A multiplier is very similar to an adder. It will set its =product= to 0 if eith
 
 A =constant= constructor simply sets the value of the designated connector. Any =I-have-a-value= or =I-lost-my-value= message sent to the constant box will produce an error.
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define (constant value connector)
       (define (me request)
         (error "Unknown request: CONSTANT"
@@ -2236,7 +2237,7 @@ A =constant= constructor simply sets the value of the designated connector. Any 
 
 Finally, a probe prints a message about the setting or unsetting of the designated connector:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define (probe name connector)
       (define (print-probe value)
         (newline) (display "Probe: ")
@@ -2263,7 +2264,7 @@ Finally, a probe prints a message about the setting or unsetting of the designat
 
 A connector is represented as a procedural object with local state variables =value=, the current value of the connector; =informant=, the object that set the connector's value; and =constraints=, a list of the constraints in which the connector participates.
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define (make-connector)
       (let ((value false)
             (informant false)
@@ -2314,7 +2315,7 @@ A connector is represented as a procedural object with local state variables =va
 
 The connector's local procedure =set-my-value= is called when there is a request to set the connector's value. If the connector does not currently have a value, it will set its value and remember as =informant= the constraint that requested the value to be set.[fn:3-160] Then the connector will notify all of its participating constraints except the constraint that requested the value to be set. This is accomplished using the following iterator, which applies a designated procedure to all items in a list except a given one:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define (for-each-except exception
                              procedure
                              list)
@@ -2333,7 +2334,7 @@ The local procedure =connect= adds the designated new constraint to the list of 
 
 The connector's procedure =me= serves as a dispatch to the other internal procedures and also represents the connector as an object. The following procedures provide a syntax interface for the dispatch:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define (has-value? connector)
       (connector 'has-value?))
     (define (get-value connector)
@@ -2357,7 +2358,7 @@ The connector's procedure =me= serves as a dispatch to the other internal proced
 #+BEGIN_QUOTE
   *Exercise 3.34:* Louis Reasoner wants to build a squarer, a constraint device with two terminals such that the value of connector =b= on the second terminal will always be the square of the value =a= on the first terminal. He proposes the following simple device made from a multiplier:
 
-  #+BEGIN_SRC scheme
+  #+BEGIN_SRC scheme :session sicp
       (define (squarer a b) (multiplier a a b))
   #+END_SRC
 
@@ -2367,7 +2368,7 @@ The connector's procedure =me= serves as a dispatch to the other internal proced
 #+BEGIN_QUOTE
   *Exercise 3.35:* Ben Bitdiddle tells Louis that one way to avoid the trouble in [[Exercise 3.34]] is to define a squarer as a new primitive constraint. Fill in the missing portions in Ben's outline for a procedure to implement such a constraint:
 
-  #+BEGIN_SRC scheme
+  #+BEGIN_SRC scheme :session sicp
       (define (squarer a b)
         (define (process-new-value)
           (if (has-value? b)
@@ -2388,7 +2389,7 @@ The connector's procedure =me= serves as a dispatch to the other internal proced
 #+BEGIN_QUOTE
   *Exercise 3.36:* Suppose we evaluate the following sequence of expressions in the global environment:
 
-  #+BEGIN_SRC scheme
+  #+BEGIN_SRC scheme :session sicp
       (define a (make-connector))
       (define b (make-connector))
       (set-value! a 10 'user)
@@ -2396,7 +2397,7 @@ The connector's procedure =me= serves as a dispatch to the other internal proced
 
   At some time during evaluation of the =set-value!=, the following expression from the connector's local procedure is evaluated:
 
-  #+BEGIN_SRC scheme
+  #+BEGIN_SRC scheme :session sicp
       (for-each-except
         setter inform-about-value constraints)
   #+END_SRC
@@ -2407,7 +2408,7 @@ The connector's procedure =me= serves as a dispatch to the other internal proced
 #+BEGIN_QUOTE
   *Exercise 3.37:* The =celsius-fahrenheit-converter= procedure is cumbersome when compared with a more expression-oriented style of definition, such as
 
-  #+BEGIN_SRC scheme
+  #+BEGIN_SRC scheme :session sicp
       (define (celsius-fahrenheit-converter x)
         (c+ (c* (c/ (cv 9) (cv 5))
                 x)
@@ -2419,7 +2420,7 @@ The connector's procedure =me= serves as a dispatch to the other internal proced
 
   Here =c+=, =c*=, etc. are the “constraint” versions of the arithmetic operations. For example, =c+= takes two connectors as arguments and returns a connector that is related to these by an adder constraint:
 
-  #+BEGIN_SRC scheme
+  #+BEGIN_SRC scheme :session sicp
       (define (c+ x y)
         (let ((z (make-connector)))
           (adder x y z)
@@ -2468,7 +2469,7 @@ The connector's procedure =me= serves as a dispatch to the other internal proced
 
 [fn:3-161] The expression-oriented format is convenient because it avoids the need to name the intermediate expressions in a computation. Our original formulation of the constraint language is cumbersome in the same way that many languages are cumbersome when dealing with operations on compound data. For example, if we wanted to compute the product [[file:fig/math/2e2bfaaaa2c75f74ad57669af5ed975a.svg]], where the variables represent vectors, we could work in “imperative style,” using procedures that set the values of designated vector arguments but do not themselves return vectors as values:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (v-sum a b temp1)
     (v-sum c d temp2)
     (v-prod temp1 temp2 answer)
@@ -2476,7 +2477,7 @@ The connector's procedure =me= serves as a dispatch to the other internal proced
 
 Alternatively, we could deal with expressions, using procedures that return vectors as values, and thus avoid explicitly mentioning =temp1= and =temp2=:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define answer
       (v-prod (v-sum a b) (v-sum c d)))
 #+END_SRC
@@ -2490,7 +2491,7 @@ We've seen the power of computational objects with local state as tools for mode
 
 The central issue lurking beneath the complexity of state, sameness, and change is that by introducing assignment we are forced to admit  /time/ into our computational models. Before we introduced assignment, all our programs were timeless, in the sense that any expression that has a value always has the same value. In contrast, recall the example of modeling withdrawals from a bank account and returning the resulting balance, introduced at the beginning of [[3.1.1]]:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (withdraw 25)
     75
 
@@ -2515,7 +2516,7 @@ In complex situations, however, such a view can be problematic. Suppose that Pet
 
 This indeterminacy in the order of events can pose serious problems in the design of concurrent systems. For instance, suppose that the withdrawals made by Peter and Paul are implemented as two separate processes sharing a common variable =balance=, each process specified by the procedure given in [[3.1.1]]:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define (withdraw amount)
       (if (>= balance amount)
           (begin
@@ -2529,7 +2530,7 @@ If the two processes operate independently, then Peter might test the balance an
 
 Things can be worse still. Consider the expression
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (set! balance (- balance amount))
 #+END_SRC
 
@@ -2597,12 +2598,12 @@ Serialization implements the following idea: Processes will execute concurrently
 
 We can use serialization to control access to shared variables. For example, if we want to update a shared variable based on the previous value of that variable, we put the access to the previous value of the variable and the assignment of the new value to the variable in the same procedure. We then ensure that no other procedure that assigns to the variable can run concurrently with this procedure by serializing all of these procedures with the same serializer. This guarantees that the value of the variable cannot be changed between an access and the corresponding assignment.
 
-*** Serializers in Scheme
+*** Serializers in Scheme :Session Sicp
 
 
 To make the above mechanism more concrete, suppose that we have extended Scheme to include a procedure called =parallel-execute=:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (parallel-execute ⟨p₁⟩
                       ⟨p₂⟩
                       …
@@ -2613,7 +2614,7 @@ Each =⟨=p=⟩= must be a procedure of no arguments. =Parallel-execute= creates
 
 As an example of how this is used, consider
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define x 10)
     (parallel-execute (lambda () (set! x (* x x)))
                       (lambda () (set! x (+ x 1))))
@@ -2639,7 +2640,7 @@ We can constrain the concurrency by using serialized procedures, which are creat
 
 Thus, in contrast to the example above, executing
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define x 10)
     (define s (make-serializer))
     (parallel-execute
@@ -2651,7 +2652,7 @@ can produce only two possible values for =x=, 101 or 121. The other possibilitie
 
 Here is a version of the =make-account= procedure from [[3.1.1]], where the deposits and withdrawals have been serialized:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define (make-account balance)
       (define (withdraw amount)
         (if (>= balance amount)
@@ -2681,7 +2682,7 @@ With this implementation, two processes cannot be withdrawing from or depositing
 #+BEGIN_QUOTE
   *Exercise 3.39:* Which of the five possibilities in the parallel execution shown above remain if we instead serialize execution as follows:
 
-  #+BEGIN_SRC scheme
+  #+BEGIN_SRC scheme :session sicp
       (define x 10)
       (define s (make-serializer))
       (parallel-execute
@@ -2695,7 +2696,7 @@ With this implementation, two processes cannot be withdrawing from or depositing
 #+BEGIN_QUOTE
   *Exercise 3.40:* Give all possible values of =x= that can result from executing
 
-  #+BEGIN_SRC scheme
+  #+BEGIN_SRC scheme :session sicp
       (define x 10)
       (parallel-execute
        (lambda () (set! x (* x x)))
@@ -2704,7 +2705,7 @@ With this implementation, two processes cannot be withdrawing from or depositing
 
   Which of these possibilities remain if we instead use serialized procedures:
 
-  #+BEGIN_SRC scheme
+  #+BEGIN_SRC scheme :session sicp
       (define x 10)
       (define s (make-serializer))
       (parallel-execute
@@ -2717,7 +2718,7 @@ With this implementation, two processes cannot be withdrawing from or depositing
 #+BEGIN_QUOTE
   *Exercise 3.41:* Ben Bitdiddle worries that it would be better to implement the bank account as follows (where the commented line has been changed):
 
-  #+BEGIN_SRC scheme
+  #+BEGIN_SRC scheme :session sicp
       (define (make-account balance)
         (define (withdraw amount)
           (if (>= balance amount)
@@ -2753,7 +2754,7 @@ With this implementation, two processes cannot be withdrawing from or depositing
 #+BEGIN_QUOTE
   *Exercise 3.42:* Ben Bitdiddle suggests that it's a waste of time to create a new serialized procedure in response to every =withdraw= and =deposit= message. He says that =make-account= could be changed so that the calls to =protected= are done outside the =dispatch= procedure. That is, an account would return the same serialized procedure (which was created at the same time as the account) each time it is asked for a withdrawal procedure.
 
-  #+BEGIN_SRC scheme
+  #+BEGIN_SRC scheme :session sicp
       (define (make-account balance)
         (define (withdraw amount)
           (if (>= balance amount)
@@ -2793,7 +2794,7 @@ Serializers provide a powerful abstraction that helps isolate the complexities o
 
 To illustrate one of the difficulties that can arise, suppose we wish to swap the balances in two bank accounts. We access each account to find the balance, compute the difference between the balances, withdraw this difference from one account, and deposit it in the other account. We could implement this as follows:[fn:3-169]
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define (exchange account1 account2)
       (let ((difference (- (account1 'balance)
                            (account2 'balance))))
@@ -2805,7 +2806,7 @@ This procedure works well when only a single process is trying to do the exchang
 
 One way we can accomplish this is by using both accounts' serializers to serialize the entire =exchange= procedure. To do this, we will arrange for access to an account's serializer. Note that we are deliberately breaking the modularity of the bank-account object by exposing the serializer. The following version of =make-account= is identical to the original version given in [[3.1.1]], except that a serializer is provided to protect the balance variable, and the serializer is exported via message passing:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define (make-account-and-serializer balance)
       (define (withdraw amount)
         (if (>= balance amount)
@@ -2832,7 +2833,7 @@ One way we can accomplish this is by using both accounts' serializers to seriali
 
 We can use this to do serialized deposits and withdrawals. However, unlike our earlier serialized account, it is now the responsibility of each user of bank-account objects to explicitly manage the serialization, for example as follows:[fn:3-171]
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define (deposit account amount)
       (let ((s (account 'serializer))
             (d (account 'deposit)))
@@ -2841,7 +2842,7 @@ We can use this to do serialized deposits and withdrawals. However, unlike our e
 
 Exporting the serializer in this way gives us enough flexibility to implement a serialized exchange program. We simply serialize the original =exchange= procedure with the serializers for both accounts:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define (serialized-exchange account1 account2)
       (let ((serializer1 (account1 'serializer))
             (serializer2 (account2 'serializer)))
@@ -2857,7 +2858,7 @@ Exporting the serializer in this way gives us enough flexibility to implement a 
 #+BEGIN_QUOTE
   *Exercise 3.44:* Consider the problem of transferring an amount from one account to another. Ben Bitdiddle claims that this can be accomplished with the following procedure, even if there are multiple people concurrently transferring money among multiple accounts, using any account mechanism that serializes deposit and withdrawal transactions, for example, the version of =make-account= in the text above.
 
-  #+BEGIN_SRC scheme
+  #+BEGIN_SRC scheme :session sicp
       (define
         (transfer from-account to-account amount)
         ((from-account 'withdraw) amount)
@@ -2870,7 +2871,7 @@ Exporting the serializer in this way gives us enough flexibility to implement a 
 #+BEGIN_QUOTE
   *Exercise 3.45:* Louis Reasoner thinks our bank-account system is unnecessarily complex and error-prone now that deposits and withdrawals aren't automatically serialized. He suggests that =make-account-and-serializer= should have exported the serializer (for use by such procedures as =serialized-exchange=) in addition to (rather than instead of) using it to serialize accounts and deposits as =make-account= did. He proposes to redefine accounts as follows:
 
-  #+BEGIN_SRC scheme
+  #+BEGIN_SRC scheme :session sicp
       (define
         (make-account-and-serializer balance)
         (define (withdraw amount)
@@ -2901,7 +2902,7 @@ Exporting the serializer in this way gives us enough flexibility to implement a 
 
   Then deposits are handled as with the original =make-account=:
 
-  #+BEGIN_SRC scheme
+  #+BEGIN_SRC scheme :session sicp
       (define (deposit account amount)
         ((account 'deposit) amount))
   #+END_SRC
@@ -2914,7 +2915,7 @@ Exporting the serializer in this way gives us enough flexibility to implement a 
 
 We implement serializers in terms of a more primitive synchronization mechanism called a  /mutex/. A mutex is an object that supports two operations---the mutex can be  /acquired/, and the mutex can be  /released/. Once a mutex has been acquired, no other acquire operations on that mutex may proceed until the mutex is released.[fn:3-172] In our implementation, each serializer has an associated mutex. Given a procedure =p=, the serializer returns a procedure that acquires the mutex, runs =p=, and then releases the mutex. This ensures that only one of the procedures produced by the serializer can be running at once, which is precisely the serialization property that we need to guarantee.
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define (make-serializer)
       (let ((mutex (make-mutex)))
         (lambda (p)
@@ -2930,7 +2931,7 @@ The mutex is a mutable object (here we'll use a one-element list, which we'll re
 
 Our mutex constructor =make-mutex= begins by initializing the cell contents to false. To acquire the mutex, we test the cell. If the mutex is available, we set the cell contents to true and proceed. Otherwise, we wait in a loop, attempting to acquire over and over again, until we find that the mutex is available.[fn:3-173] To release the mutex, we set the cell contents to false.
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define (make-mutex)
       (let ((cell (list false)))
         (define (the-mutex m)
@@ -2944,7 +2945,7 @@ Our mutex constructor =make-mutex= begins by initializing the cell contents to f
 
 =Test-and-set!= tests the cell and returns the result of the test. In addition, if the test was false, =test-and-set!= sets the cell contents to true before returning false. We can express this behavior as the following procedure:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define (test-and-set! cell)
       (if (car cell)
           true
@@ -3022,7 +3023,7 @@ The basic phenomenon here is that synchronizing different processes, establishin
 
 [fn:3-174] In MIT Scheme for a single processor, which uses a time-slicing model, =test-and-set!= can be implemented as follows:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define (test-and-set! cell)
       (without-interrupts
        (lambda ()
@@ -3065,7 +3066,7 @@ Unfortunately, if we represent sequences as lists, this elegance is bought at th
 
 To see why this is true, let us compare two programs for computing the sum of all the prime numbers in an interval. The first program is written in standard iterative style:[fn:3-181]
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define (sum-primes a b)
       (define (iter count accum)
         (cond ((> count b) accum)
@@ -3078,7 +3079,7 @@ To see why this is true, let us compare two programs for computing the sum of al
 
 The second program performs the same computation using the sequence operations of [[2.2.3]]:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define (sum-primes a b)
       (accumulate
        +
@@ -3090,7 +3091,7 @@ In carrying out the computation, the first program needs to store only the sum b
 
 The inefficiency in using lists becomes painfully apparent if we use the sequence paradigm to compute the second prime in the interval from 10,000 to 1,000,000 by evaluating the expression
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (car (cdr
           (filter
            prime?
@@ -3110,7 +3111,7 @@ On the surface, streams are just lists with different names for the procedures t
 
 There is a distinguishable object, =the-empty-stream=, which cannot be the result of any =cons-stream= operation, and which can be identified with the predicate =stream-null?=.[fn:3-183]
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define (stream-ref s n)
       (if (= n 0)
           (stream-car s)
@@ -3134,7 +3135,7 @@ There is a distinguishable object, =the-empty-stream=, which cannot be the resul
 
 =Stream-for-each= is useful for viewing streams:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define (display-stream s)
       (stream-for-each display-line s))
 
@@ -3149,19 +3150,19 @@ Our implementation of streams will be based on a special form called =delay=. Ev
 
 =Cons-stream= is a special form defined so that
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (cons-stream ⟨a⟩ ⟨b⟩)
 #+END_SRC
 
 is equivalent to
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (cons ⟨a⟩ (delay ⟨b⟩))
 #+END_SRC
 
 What this means is that we will construct streams using pairs. However, rather than placing the value of the rest of the stream into the =cdr= of the pair we will put there a promise to compute the rest if it is ever requested. =Stream-car= and =stream-cdr= can now be defined as procedures:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define (stream-car stream)
       (car stream))
 
@@ -3177,7 +3178,7 @@ What this means is that we will construct streams using pairs. However, rather t
 
 To see how this implementation behaves, let us analyze the “outrageous” prime computation we saw above, reformulated in terms of streams:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (stream-car
      (stream-cdr
       (stream-filter
@@ -3189,7 +3190,7 @@ We will see that it does indeed work efficiently.
 
 We begin by calling =stream-enumerate-interval= with the arguments 10,000 and 1,000,000. =Stream-enumerate-interval= is the stream analog of =enumerate-interval= ([[2.2.3]]):
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define (stream-enumerate-interval low high)
       (if (> low high)
           the-empty-stream
@@ -3201,7 +3202,7 @@ We begin by calling =stream-enumerate-interval= with the arguments 10,000 and 1,
 
 and thus the result returned by =stream-enumerate-interval=, formed by the =cons-stream=, is[fn:3-185]
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (cons 10000
           (delay
             (stream-enumerate-interval
@@ -3211,7 +3212,7 @@ and thus the result returned by =stream-enumerate-interval=, formed by the =cons
 
 That is, =stream-enumerate-interval= returns a stream represented as a pair whose =car= is 10,000 and whose =cdr= is a promise to enumerate more of the interval if so requested. This stream is now filtered for primes, using the stream analog of the =filter= procedure ([[2.2.3]]):
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define (stream-filter pred stream)
       (cond ((stream-null? stream)
              the-empty-stream)
@@ -3228,7 +3229,7 @@ That is, =stream-enumerate-interval= returns a stream represented as a pair whos
 
 =Stream-filter= tests the =stream-car= of the stream (the =car= of the pair, which is 10,000). Since this is not prime, =stream-filter= examines the =stream-cdr= of its input stream. The call to =stream-cdr= forces evaluation of the delayed =stream-enumerate-interval=, which now returns
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (cons 10001
           (delay
             (stream-enumerate-interval
@@ -3238,7 +3239,7 @@ That is, =stream-enumerate-interval= returns a stream represented as a pair whos
 
 =Stream-filter= now looks at the =stream-car= of this stream, 10,001, sees that this is not prime either, forces another =stream-cdr=, and so on, until =stream-enumerate-interval= yields the prime 10,007, whereupon =stream-filter=, according to its definition, returns
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (cons-stream
      (stream-car stream)
      (stream-filter pred (stream-cdr stream)))
@@ -3246,7 +3247,7 @@ That is, =stream-enumerate-interval= returns a stream represented as a pair whos
 
 which in this case is
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (cons 10007
           (delay
             (stream-filter
@@ -3259,7 +3260,7 @@ which in this case is
 
 This result is now passed to =stream-cdr= in our original expression. This forces the delayed =stream-filter=, which in turn keeps forcing the delayed =stream-enumerate-interval= until it finds the next prime, which is 10,009. Finally, the result passed to =stream-car= in our original expression is
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (cons 10009
           (delay
             (stream-filter
@@ -3280,26 +3281,26 @@ In general, we can think of delayed evaluation as “demand-driven” programmin
 
 Although =delay= and =force= may seem like mysterious operations, their implementation is really quite straightforward. =Delay= must package an expression so that it can be evaluated later on demand, and we can accomplish this simply by treating the expression as the body of a procedure. =Delay= can be a special form such that
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (delay ⟨exp⟩)
 #+END_SRC
 
 is syntactic sugar for
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (lambda () ⟨exp⟩)
 #+END_SRC
 
 =Force= simply calls the procedure (of no arguments) produced by =delay=, so we can implement =force= as a procedure:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define (force delayed-object)
       (delayed-object))
 #+END_SRC
 
 This implementation suffices for =delay= and =force= to work as advertised, but there is an important optimization that we can include. In many applications, we end up forcing the same delayed object many times. This can lead to serious inefficiency in recursive programs involving streams. (See [[Exercise 3.57]].) The solution is to build delayed objects so that the first time they are forced, they store the value that is computed. Subsequent forcings will simply return the stored value without repeating the computation. In other words, we implement =delay= as a special-purpose memoized procedure similar to the one described in [[Exercise 3.27]]. One way to accomplish this is to use the following procedure, which takes as argument a procedure (of no arguments) and returns a memoized version of the procedure. The first time the memoized procedure is run, it saves the computed result. On subsequent evaluations, it simply returns the result.
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define (memo-proc proc)
       (let ((already-run? false) (result false))
         (lambda ()
@@ -3312,7 +3313,7 @@ This implementation suffices for =delay= and =force= to work as advertised, but 
 
 =Delay= is then defined so that =(delay ⟨exp⟩)= is equivalent to
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (memo-proc (lambda () ⟨exp⟩))
 #+END_SRC
 
@@ -3321,7 +3322,7 @@ and =force= is as defined previously.[fn:3-186]
 #+BEGIN_QUOTE
   *Exercise 3.50:* Complete the following definition, which generalizes =stream-map= to allow procedures that take multiple arguments, analogous to =map= in [[2.2.1]], [[Footnote 78]].
 
-  #+BEGIN_SRC scheme
+  #+BEGIN_SRC scheme :session sicp
       (define (stream-map proc . argstreams)
         (if (⟨??⟩ (car argstreams))
             the-empty-stream
@@ -3338,7 +3339,7 @@ and =force= is as defined previously.[fn:3-186]
 #+BEGIN_QUOTE
   *Exercise 3.51:* In order to take a closer look at delayed evaluation, we will use the following procedure, which simply returns its argument after printing it:
 
-  #+BEGIN_SRC scheme
+  #+BEGIN_SRC scheme :session sicp
       (define (show x)
         (display-line x)
         x)
@@ -3346,7 +3347,7 @@ and =force= is as defined previously.[fn:3-186]
 
   What does the interpreter print in response to evaluating each expression in the following sequence?[fn:3-187]
 
-  #+BEGIN_SRC scheme
+  #+BEGIN_SRC scheme :session sicp
       (define x
         (stream-map
          show
@@ -3361,7 +3362,7 @@ and =force= is as defined previously.[fn:3-186]
 #+BEGIN_QUOTE
   *Exercise 3.52:* Consider the sequence of expressions
 
-  #+BEGIN_SRC scheme
+  #+BEGIN_SRC scheme :session sicp
       (define sum 0)
 
       (define (accum x)
@@ -3392,7 +3393,7 @@ and =force= is as defined previously.[fn:3-186]
 
 We have seen how to support the illusion of manipulating streams as complete entities even though, in actuality, we compute only as much of the stream as we need to access. We can exploit this technique to represent sequences efficiently as streams, even if the sequences are very long. What is more striking, we can use streams to represent sequences that are infinitely long. For instance, consider the following definition of the stream of positive integers:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define (integers-starting-from n)
       (cons-stream
        n (integers-starting-from (+ n 1))))
@@ -3403,7 +3404,7 @@ This makes sense because =integers= will be a pair whose =car= is 1 and whose =c
 
 Using =integers= we can define other infinite streams, such as the stream of integers that are not divisible by 7:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define (divisible? x y) (= (remainder x y) 0))
     (define no-sevens
       (stream-filter (lambda (x)
@@ -3413,14 +3414,14 @@ Using =integers= we can define other infinite streams, such as the stream of int
 
 Then we can find integers not divisible by 7 simply by accessing elements of this stream:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (stream-ref no-sevens 100)
     117
 #+END_SRC
 
 In analogy with =integers=, we can define the infinite stream of Fibonacci numbers:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define (fibgen a b)
       (cons-stream a (fibgen b (+ a b))))
     (define fibs (fibgen 0 1))
@@ -3430,7 +3431,7 @@ In analogy with =integers=, we can define the infinite stream of Fibonacci numbe
 
 For a look at a more exciting infinite stream, we can generalize the =no-sevens= example to construct the infinite stream of prime numbers, using a method known as the  /sieve of Eratosthenes/.[fn:3-188] We start with the integers beginning with 2, which is the first prime. To get the rest of the primes, we start by filtering the multiples of 2 from the rest of the integers. This leaves a stream beginning with 3, which is the next prime. Now we filter the multiples of 3 from the rest of this stream. This leaves a stream beginning with 5, which is the next prime, and so on. In other words, we construct the primes by a sieving process, described as follows: To sieve a stream =S=, form a stream whose first element is the first element of =S= and the rest of which is obtained by filtering all multiples of the first element of =S= out of the rest of =S= and sieving the result. This process is readily described in terms of stream operations:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define (sieve stream)
       (cons-stream
        (stream-car stream)
@@ -3446,7 +3447,7 @@ For a look at a more exciting infinite stream, we can generalize the =no-sevens=
 
 Now to find a particular prime we need only ask for it:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (stream-ref primes 50)
     233
 #+END_SRC
@@ -3462,7 +3463,7 @@ It is interesting to contemplate the signal-processing system set up by =sieve=,
 
 The =integers= and =fibs= streams above were defined by specifying “generating” procedures that explicitly compute the stream elements one by one. An alternative way to specify streams is to take advantage of delayed evaluation to define streams implicitly. For example, the following expression defines the stream =ones= to be an infinite stream of ones:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define ones (cons-stream 1 ones))
 #+END_SRC
 
@@ -3470,14 +3471,14 @@ This works much like the definition of a recursive procedure: =ones= is a pair w
 
 We can do more interesting things by manipulating streams with operations such as =add-streams=, which produces the elementwise sum of two given streams:[fn:3-190]
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define (add-streams s1 s2)
       (stream-map + s1 s2))
 #+END_SRC
 
 Now we can define the integers as follows:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define integers
       (cons-stream 1 (add-streams ones integers)))
 #+END_SRC
@@ -3486,7 +3487,7 @@ This defines =integers= to be a stream whose first element is 1 and the rest of 
 
 We can define the Fibonacci numbers in the same style:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define fibs
       (cons-stream
        0 (cons-stream
@@ -3504,7 +3505,7 @@ This definition says that =fibs= is a stream beginning with 0 and 1, such that t
 
 =Scale-stream= is another useful procedure in formulating such stream definitions. This multiplies each item in a stream by a given constant:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define (scale-stream stream factor)
       (stream-map
        (lambda (x) (* x factor))
@@ -3513,7 +3514,7 @@ This definition says that =fibs= is a stream beginning with 0 and 1, such that t
 
 For example,
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define double
       (cons-stream 1 (scale-stream double 2)))
 #+END_SRC
@@ -3522,7 +3523,7 @@ produces the stream of powers of 2: 1, 2, 4, 8, 16, 32, ....
 
 An alternate definition of the stream of primes can be given by starting with the integers and filtering them by testing for primality. We will need the first prime, 2, to get started:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define primes
       (cons-stream
        2 (stream-filter
@@ -3531,7 +3532,7 @@ An alternate definition of the stream of primes can be given by starting with th
 
 This definition is not so straightforward as it appears, because we will test whether a number [[file:fig/math/0932467390da34555ec70c122d7e915e.svg]] is prime by checking whether [[file:fig/math/0932467390da34555ec70c122d7e915e.svg]] is divisible by a prime (not by just any integer) less than or equal to [[file:fig/math/6401acda6e40516e261b2a2cd409285f.svg]]:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define (prime? n)
       (define (iter ps)
         (cond ((> (square (stream-car ps)) n) true)
@@ -3545,7 +3546,7 @@ This is a recursive definition, since =primes= is defined in terms of the =prime
 #+BEGIN_QUOTE
   *Exercise 3.53:* Without running the program, describe the elements of the stream defined by
 
-  #+BEGIN_SRC scheme
+  #+BEGIN_SRC scheme :session sicp
       (define s (cons-stream 1 (add-streams s s)))
   #+END_SRC
 
@@ -3554,7 +3555,7 @@ This is a recursive definition, since =primes= is defined in terms of the =prime
 #+BEGIN_QUOTE
   *Exercise 3.54:* Define a procedure =mul-streams=, analogous to =add-streams=, that produces the elementwise product of its two input streams. Use this together with the stream of =integers= to complete the following definition of the stream whose [[file:fig/math/3b6c232f796b2d291446b22cb38c933e.svg]] element (counting from 0) is [[file:fig/math/c09177a287583da634d642d340852664.svg]] factorial:
 
-  #+BEGIN_SRC scheme
+  #+BEGIN_SRC scheme :session sicp
       (define factorials
         (cons-stream 1 (mul-streams ⟨??⟩ ⟨??⟩)))
   #+END_SRC
@@ -3575,7 +3576,7 @@ This is a recursive definition, since =primes= is defined in terms of the =prime
 
   Now all we have to do is combine elements from these sources. For this we define a procedure =merge= that combines two ordered streams into one ordered result stream, eliminating repetitions:
 
-  #+BEGIN_SRC scheme
+  #+BEGIN_SRC scheme :session sicp
       (define (merge s1 s2)
         (cond ((stream-null? s1) s2)
               ((stream-null? s2) s1)
@@ -3602,7 +3603,7 @@ This is a recursive definition, since =primes= is defined in terms of the =prime
 
   Then the required stream may be constructed with =merge=, as follows:
 
-  #+BEGIN_SRC scheme
+  #+BEGIN_SRC scheme :session sicp
       (define S (cons-stream 1 (merge ⟨??⟩ ⟨??⟩)))
   #+END_SRC
 
@@ -3616,7 +3617,7 @@ This is a recursive definition, since =primes= is defined in terms of the =prime
 #+BEGIN_QUOTE
   *Exercise 3.58:* Give an interpretation of the stream computed by the following procedure:
 
-  #+BEGIN_SRC scheme
+  #+BEGIN_SRC scheme :session sicp
       (define (expand num den radix)
         (cons-stream
          (quotient (* num radix) den)
@@ -3634,7 +3635,7 @@ This is a recursive definition, since =primes= is defined in terms of the =prime
   1. The integral of the series [[file:fig/math/b60fa91d48bd906a10c9cb7ef4b6ca23.svg]] is the series [[file:fig/math/ee5b5c55345aaca8f2b5d0bdf2a25eca.svg]] where [[file:fig/math/b98937403abaaeb001eed7d68959205d.svg]] is any constant. Define a procedure =integrate-series= that takes as input a stream [[file:fig/math/a165fae8b3379b5b86caf620688ab9d6.svg]], [[file:fig/math/0419040fb91e96b48ec2d15ad4081c9a.svg]], [[file:fig/math/c5d8ae8f215f7fe9c23b45926b8bdeb5.svg]], ... representing a power series and returns the stream [[file:fig/math/a165fae8b3379b5b86caf620688ab9d6.svg]], [[file:fig/math/6bbba4b78e9b464563753dfeca03ad56.svg]], [[file:fig/math/e8f660c8fb2fc1a84834adcdbe3e761a.svg]], ... of coefficients of the non-constant terms of the integral of the series. (Since the result has no constant term, it doesn't represent a power series; when we use =integrate-series=, we will =cons= on the appropriate constant.)
   2. The function [[file:fig/math/ba99f9d43d44373e1faf54b4887893ba.svg]] is its own derivative. This implies that [[file:fig/math/7c7f7091f6e090480d15653cbccc9f87.svg]] and the integral of [[file:fig/math/7c7f7091f6e090480d15653cbccc9f87.svg]] are the same series, except for the constant term, which is [[file:fig/math/ff764142a6191db1e12e236158133d92.svg]]. Accordingly, we can generate the series for [[file:fig/math/7c7f7091f6e090480d15653cbccc9f87.svg]] as
 
-     #+BEGIN_SRC scheme
+     #+BEGIN_SRC scheme :session sicp
          (define exp-series
            (cons-stream
             1 (integrate-series exp-series)))
@@ -3642,7 +3643,7 @@ This is a recursive definition, since =primes= is defined in terms of the =prime
 
      Show how to generate the series for sine and cosine, starting from the facts that the derivative of sine is cosine and the derivative of cosine is the negative of sine:
 
-     #+BEGIN_SRC scheme
+     #+BEGIN_SRC scheme :session sicp
          (define cosine-series
            (cons-stream 1 ⟨??⟩))
 
@@ -3655,7 +3656,7 @@ This is a recursive definition, since =primes= is defined in terms of the =prime
 #+BEGIN_QUOTE
   *Exercise 3.60:* With power series represented as streams of coefficients as in [[Exercise 3.59]], adding series is implemented by =add-streams=. Complete the definition of the following procedure for multiplying series:
 
-  #+BEGIN_SRC scheme
+  #+BEGIN_SRC scheme :session sicp
       (define (mul-series s1 s2)
         (cons-stream ⟨??⟩ (add-streams ⟨??⟩ ⟨??⟩)))
   #+END_SRC
@@ -3684,14 +3685,14 @@ The stream approach can be illuminating because it allows us to build systems wi
 
 In section [[1.2.1]], we introduced iterative processes, which proceed by updating state variables. We know now that we can represent state as a “timeless” stream of values rather than as a set of variables to be updated. Let's adopt this perspective in revisiting the square-root procedure from [[1.1.7]]. Recall that the idea is to generate a sequence of better and better guesses for the square root of [[file:fig/math/2f4b15565d0a1018e90c3e1b30b76acc.svg]] by applying over and over again the procedure that improves guesses:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define (sqrt-improve guess x)
       (average guess (/ x guess)))
 #+END_SRC
 
 In our original =sqrt= procedure, we made these guesses be the successive values of a state variable. Instead we can generate the infinite stream of guesses, starting with an initial guess of 1:[fn:3-193]
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define (sqrt-stream x)
       (define guesses
         (cons-stream
@@ -3714,7 +3715,7 @@ We can generate more and more terms of the stream to get better and better guess
 
 Another iteration that we can treat in the same way is to generate an approximation to [[file:fig/math/c25469cd205e957b38b51203870f48af.svg]], based upon the alternating series that we saw in [[1.3.1]]: [[file:fig/math/dccad749df98b6f22231cf93aa7d5db8.svg]] We first generate the stream of summands of the series (the reciprocals of the odd integers, with alternating signs). Then we take the stream of sums of more and more terms (using the =partial-sums= procedure of [[Exercise 3.55]]) and scale the result by 4:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define (pi-summands n)
       (cons-stream
        (/ 1.0 n)
@@ -3742,7 +3743,7 @@ So far, our use of the stream of states approach is not much different from upda
 
 One such accelerator, due to the eighteenth-century Swiss mathematician Leonhard Euler, works well with sequences that are partial sums of alternating series (series of terms with alternating signs). In Euler's technique, if [[file:fig/math/0c3097352e9e517a82f406c0dab738c5.svg]] is the [[file:fig/math/3b6c232f796b2d291446b22cb38c933e.svg]] term of the original sum sequence, then the accelerated sequence has terms [[file:fig/math/2b2c6dbadd5306218e802a992e2042c1.svg]] Thus, if the original sequence is represented as a stream of values, the transformed sequence is given by
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define (euler-transform s)
       (let ((s0 (stream-ref s 0))     ; Sₙ₋₁
             (s1 (stream-ref s 1))     ; Sₙ
@@ -3755,7 +3756,7 @@ One such accelerator, due to the eighteenth-century Swiss mathematician Leonhard
 
 We can demonstrate Euler acceleration with our sequence of approximations to [[file:fig/math/c25469cd205e957b38b51203870f48af.svg]]:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (display-stream
      (euler-transform pi-stream))
     3.166666666666667
@@ -3771,7 +3772,7 @@ We can demonstrate Euler acceleration with our sequence of approximations to [[f
 
 Even better, we can accelerate the accelerated sequence, and recursively accelerate that, and so on. Namely, we create a stream of streams (a structure we'll call a  /tableau/) in which each stream is the transform of the preceding one:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define (make-tableau transform s)
       (cons-stream
        s
@@ -3782,7 +3783,7 @@ Even better, we can accelerate the accelerated sequence, and recursively acceler
 
 The tableau has the form [[file:fig/math/77e9263cdf29b1cdcfafe50d8c769c77.svg]] Finally, we form a sequence by taking the first term in each row of the tableau:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define (accelerated-sequence transform s)
       (stream-map stream-car
                   (make-tableau transform s)))
@@ -3790,7 +3791,7 @@ The tableau has the form [[file:fig/math/77e9263cdf29b1cdcfafe50d8c769c77.svg]] 
 
 We can demonstrate this kind of “super-acceleration” of the [[file:fig/math/c25469cd205e957b38b51203870f48af.svg]] sequence:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (display-stream
      (accelerated-sequence euler-transform
                            pi-stream))
@@ -3812,7 +3813,7 @@ We could have implemented these acceleration techniques without using streams. B
 #+BEGIN_QUOTE
   *Exercise 3.63:* Louis Reasoner asks why the =sqrt-stream= procedure was not written in the following more straightforward way, without the local variable =guesses=:
 
-  #+BEGIN_SRC scheme
+  #+BEGIN_SRC scheme :session sicp
       (define (sqrt-stream x)
         (cons-stream
          1.0
@@ -3827,7 +3828,7 @@ We could have implemented these acceleration techniques without using streams. B
 #+BEGIN_QUOTE
   *Exercise 3.64:* Write a procedure =stream-limit= that takes as arguments a stream and a number (the tolerance). It should examine the stream until it finds two successive elements that differ in absolute value by less than the tolerance, and return the second of the two elements. Using this, we could compute square roots up to a given tolerance by
 
-  #+BEGIN_SRC scheme
+  #+BEGIN_SRC scheme :session sicp
       (define (sqrt x tolerance)
         (stream-limit (sqrt-stream x) tolerance))
   #+END_SRC
@@ -3846,7 +3847,7 @@ In [[2.2.3]], we saw how the sequence paradigm handles traditional nested loops 
 
 For example, suppose we want to generalize the =prime-sum-pairs= procedure of [[2.2.3]] to produce the stream of pairs of /all/ integers [[file:fig/math/b3e51b500a677738d763b9243179a091.svg]] with [[file:fig/math/abd99fa84a4de8dd35d5caa76adaef23.svg]] such that [[file:fig/math/c6ad57c179a45a768d358dff2d5b5da3.svg]] is prime. If =int-pairs= is the sequence of all pairs of integers [[file:fig/math/b3e51b500a677738d763b9243179a091.svg]] with [[file:fig/math/abd99fa84a4de8dd35d5caa76adaef23.svg]], then our required stream is simply[fn:3-194]
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (stream-filter
      (lambda (pair)
        (prime? (+ (car pair) (cadr pair))))
@@ -3857,7 +3858,7 @@ Our problem, then, is to produce the stream =int-pairs=. More generally, suppose
 
 Call the general stream of pairs =(pairs S T)=, and consider it to be composed of three parts: the pair [[file:fig/math/bd66f5cdaad4cea3d736fd9bd57b8e4f.svg]], the rest of the pairs in the first row, and the remaining pairs:[fn:3-195] [[file:fig/math/222e6625a866defe42456b9ec507580a.svg]] Observe that the third piece in this decomposition (pairs that are not in the first row) is (recursively) the pairs formed from =(stream-cdr S)= and =(stream-cdr T)=. Also note that the second piece (the rest of the first row) is
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (stream-map (lambda (x)
                   (list (stream-car s) x))
                 (stream-cdr t))
@@ -3865,7 +3866,7 @@ Call the general stream of pairs =(pairs S T)=, and consider it to be composed o
 
 Thus we can form our stream of pairs as follows:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define (pairs s t)
       (cons-stream
        (list (stream-car s) (stream-car t))
@@ -3879,7 +3880,7 @@ Thus we can form our stream of pairs as follows:
 
 In order to complete the procedure, we must choose some way to combine the two inner streams. One idea is to use the stream analog of the =append= procedure from [[2.2.1]]:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define (stream-append s1 s2)
       (if (stream-null? s1)
           s2
@@ -3890,7 +3891,7 @@ In order to complete the procedure, we must choose some way to combine the two i
 
 This is unsuitable for infinite streams, however, because it takes all the elements from the first stream before incorporating the second stream. In particular, if we try to generate all pairs of positive integers using
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (pairs integers integers)
 #+END_SRC
 
@@ -3898,7 +3899,7 @@ our stream of results will first try to run through all pairs with the first int
 
 To handle infinite streams, we need to devise an order of combination that ensures that every element will eventually be reached if we let our program run long enough. An elegant way to accomplish this is with the following =interleave= procedure:[fn:3-196]
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define (interleave s1 s2)
       (if (stream-null? s1)
           s2
@@ -3911,7 +3912,7 @@ Since =interleave= takes elements alternately from the two streams, every elemen
 
 We can thus generate the required stream of pairs as
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define (pairs s t)
       (cons-stream
        (list (stream-car s) (stream-car t))
@@ -3933,7 +3934,7 @@ We can thus generate the required stream of pairs as
 #+BEGIN_QUOTE
   *Exercise 3.68:* Louis Reasoner thinks that building a stream of pairs from three parts is unnecessarily complicated. Instead of separating the pair [[file:fig/math/bd66f5cdaad4cea3d736fd9bd57b8e4f.svg]] from the rest of the pairs in the first row, he proposes to work with the whole first row, as follows:
 
-  #+BEGIN_SRC scheme
+  #+BEGIN_SRC scheme :session sicp
       (define (pairs s t)
         (interleave
          (stream-map
@@ -3972,7 +3973,7 @@ We can thus generate the required stream of pairs as
 
 We began our discussion of streams by describing them as computational analogs of the “signals” in signal-processing systems. In fact, we can use streams to model signal-processing systems in a very direct way, representing the values of a signal at successive time intervals as consecutive elements of a stream. For instance, we can implement an  /integrator/ or  /summer/ that, for an input stream [[file:fig/math/f2f7ad008ff77a18900341213f807da0.svg]], an initial value [[file:fig/math/684e3ac6700a3aa191a0a61645d5b384.svg]], and a small increment [[file:fig/math/d3c1074774c34911f99ecb81f361716d.svg]], accumulates the sum [[file:fig/math/320cf002a4855ac505055af11e8f1a4e.svg]] and returns the stream of values [[file:fig/math/3768dd4f99fd2a21fd89391488ce9e6b.svg]]. The following =integral= procedure is reminiscent of the “implicit style” definition of the stream of integers ([[3.5.2]]):
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define (integral integrand initial-value dt)
       (define int
         (cons-stream
@@ -3999,14 +4000,14 @@ We began our discussion of streams by describing them as computational analogs o
 #+BEGIN_QUOTE
   *Exercise 3.74:* Alyssa P. Hacker is designing a system to process signals coming from physical sensors. One important feature she wishes to produce is a signal that describes the  /zero crossings/ of the input signal. That is, the resulting signal should be [[file:fig/math/d6848d11ac9f4fb573601777b943a529.svg]] whenever the input signal changes from negative to positive, [[file:fig/math/f414ba729a14753d41004ffe71140ba9.svg]] whenever the input signal changes from positive to negative, and [[file:fig/math/dea28aa47a858eacfd9e22fe41c999f0.svg]] otherwise. (Assume that the sign of a [[file:fig/math/dea28aa47a858eacfd9e22fe41c999f0.svg]] input is positive.) For example, a typical input signal with its associated zero-crossing signal would be
 
-  #+BEGIN_SRC scheme
+  #+BEGIN_SRC scheme :session sicp
       … 1 2 1.5 1 0.5 -0.1 -2 -3 -2 -0.5 0.2 3 4 …
       … 0 0  0  0  0   -1   0  0  0   0   1  0 0 …
   #+END_SRC
 
   In Alyssa's system, the signal from the sensor is represented as a stream =sense-data= and the stream =zero-crossings= is the corresponding stream of zero crossings. Alyssa first writes a procedure =sign-change-detector= that takes two values as arguments and compares the signs of the values to produce an appropriate [[file:fig/math/dea28aa47a858eacfd9e22fe41c999f0.svg]], [[file:fig/math/8fddb65f811d9e1f6a1703617a4e84ba.svg]], or [[file:fig/math/f414ba729a14753d41004ffe71140ba9.svg]]. She then constructs her zero-crossing stream as follows:
 
-  #+BEGIN_SRC scheme
+  #+BEGIN_SRC scheme :session sicp
       (define (make-zero-crossings
                input-stream last-value)
         (cons-stream
@@ -4023,7 +4024,7 @@ We began our discussion of streams by describing them as computational analogs o
 
   Alyssa's boss, Eva Lu Ator, walks by and suggests that this program is approximately equivalent to the following one, which uses the generalized version of =stream-map= from [[Exercise 3.50]]:
 
-  #+BEGIN_SRC scheme
+  #+BEGIN_SRC scheme :session sicp
       (define zero-crossings
         (stream-map sign-change-detector
                     sense-data
@@ -4036,7 +4037,7 @@ We began our discussion of streams by describing them as computational analogs o
 #+BEGIN_QUOTE
   *Exercise 3.75:* Unfortunately, Alyssa's zero-crossing detector in [[Exercise 3.74]] proves to be insufficient, because the noisy signal from the sensor leads to spurious zero crossings. Lem E. Tweakit, a hardware specialist, suggests that Alyssa smooth the signal to filter out the noise before extracting the zero crossings. Alyssa takes his advice and decides to extract the zero crossings from the signal constructed by averaging each value of the sense data with the previous value. She explains the problem to her assistant, Louis Reasoner, who attempts to implement the idea, altering Alyssa's program as follows:
 
-  #+BEGIN_SRC scheme
+  #+BEGIN_SRC scheme :session sicp
       (define (make-zero-crossings
                input-stream last-value)
         (let ((avpt
@@ -4061,7 +4062,7 @@ We began our discussion of streams by describing them as computational analogs o
 
 The =integral= procedure at the end of the preceding section shows how we can use streams to model signal-processing systems that contain feedback loops. The feedback loop for the adder shown in [[Figure 3.32]] is modeled by the fact that =integral='s internal stream =int= is defined in terms of itself:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define int
       (cons-stream
        initial-value
@@ -4078,7 +4079,7 @@ Unfortunately, stream models of systems with loops may require uses of =delay= b
 
 Assuming we are given an initial value [[file:fig/math/d78d283068e4a83e3450cbee5438d9f0.svg]] for [[file:fig/math/05e4cdb2f26a4f66b68c167423907fea.svg]], we could try to model this system using the procedure
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define (solve f y0 dt)
       (define y (integral dy y0 dt))
       (define dy (stream-map f y))
@@ -4091,7 +4092,7 @@ On the other hand, the intent of our definition does make sense, because we can,
 
 To take advantage of this idea, we will redefine =integral= to expect the integrand stream to be a  /delayed argument/. =Integral= will =force= the integrand to be evaluated only when it is required to generate more than the first element of the output stream:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define (integral
              delayed-integrand initial-value dt)
       (define int
@@ -4107,7 +4108,7 @@ To take advantage of this idea, we will redefine =integral= to expect the integr
 
 Now we can implement our =solve= procedure by delaying the evaluation of =dy= in the definition of =y=:[fn:3-199]
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define (solve f y0 dt)
       (define y (integral (delay dy) y0 dt))
       (define dy (stream-map f y))
@@ -4116,7 +4117,7 @@ Now we can implement our =solve= procedure by delaying the evaluation of =dy= in
 
 In general, every caller of =integral= must now =delay= the integrand argument. We can demonstrate that the =solve= procedure works by approximating [[file:fig/math/58dc533f92bdb70d1c52b693abb23c8a.svg]] by computing the value at [[file:fig/math/5c33785cdb067265921a72a7196bdffb.svg]] of the solution to the differential equation [[file:fig/math/b161bd4a0969f63ba846bcc67cc478f8.svg]] with initial condition [[file:fig/math/0baeaa2084bf6f32ebb3409ba3266885.svg]]:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (stream-ref
      (solve (lambda (y) y) 1 0.001) 1000)
     2.716924
@@ -4125,7 +4126,7 @@ In general, every caller of =integral= must now =delay= the integrand argument. 
 #+BEGIN_QUOTE
   *Exercise 3.77:* The =integral= procedure used above was analogous to the “implicit” definition of the infinite stream of integers in [[3.5.2]]. Alternatively, we can give a definition of =integral= that is more like =integers-starting-from= (also in [[3.5.2]]):
 
-  #+BEGIN_SRC scheme
+  #+BEGIN_SRC scheme :session sicp
       (define (integral
                integrand initial-value dt)
         (cons-stream
@@ -4182,7 +4183,7 @@ As we saw in [[3.1.2]], one of the major benefits of introducing assignment is t
 
 The key modularity issue was that we wished to hide the internal state of a random-number generator from programs that used random numbers. We began with a procedure =rand-update=, whose successive values furnished our supply of random numbers, and used this to produce a random-number generator:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define rand
       (let ((x random-init))
         (lambda ()
@@ -4192,7 +4193,7 @@ The key modularity issue was that we wished to hide the internal state of a rand
 
 In the stream formulation there is no random-number generator /per se/, just a stream of random numbers produced by successive calls to =rand-update=:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define random-numbers
       (cons-stream random-init
                    (stream-map rand-update
@@ -4201,7 +4202,7 @@ In the stream formulation there is no random-number generator /per se/, just a s
 
 We use this to construct the stream of outcomes of the Cesàro experiment performed on consecutive pairs in the =random-numbers= stream:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define cesaro-stream
       (map-successive-pairs
        (lambda (r1 r2) (= (gcd r1 r2) 1))
@@ -4217,7 +4218,7 @@ We use this to construct the stream of outcomes of the Cesàro experiment perfor
 
 The =cesaro-stream= is now fed to a =monte-carlo= procedure, which produces a stream of estimates of probabilities. The results are then converted into a stream of estimates of [[file:fig/math/c25469cd205e957b38b51203870f48af.svg]]. This version of the program doesn't need a parameter telling how many trials to perform. Better estimates of [[file:fig/math/c25469cd205e957b38b51203870f48af.svg]] (from performing more experiments) are obtained by looking farther into the =pi= stream:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define (monte-carlo experiment-stream
                          passed
                          failed)
@@ -4258,7 +4259,7 @@ Now we have seen that streams provide an alternative way to model objects with l
 
 In order to contrast these two approaches to modeling, let us reconsider the implementation of a “withdrawal processor” that monitors the balance in a bank account. In [[3.1.3]] we implemented a simplified version of such a processor:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define (make-simplified-withdraw balance)
       (lambda (amount)
         (set! balance (- balance amount))
@@ -4269,7 +4270,7 @@ Calls to =make-simplified-withdraw= produce computational objects, each with a l
 
 Alternatively, we can model a withdrawal processor as a procedure that takes as input a balance and a stream of amounts to withdraw and produces the stream of successive balances in the account:
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :session sicp
     (define (stream-withdraw balance amount-stream)
       (cons-stream
        balance
