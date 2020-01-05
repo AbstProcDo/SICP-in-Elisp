@@ -9,22 +9,22 @@ SICP常读常新, 如绘画, 层层递进, 构图, 起形, 框架, 明暗, 光�
 
 * 1.Build Abstraction with Procedures
 目录鱼骨图
-#+ATTR_HTML: :width 700px
+#+ATTR_HTML: :width 500px
 [[file:./images/sicp-1.1-elements.jpeg]]
 
-#+ATTR_HTML: :width 700px
+#+ATTR_HTML: :width 500px
  [[file:./images/sicp-1.2-procedures.jpeg]]
 
 * 2.Building Abstraction with Data
-#+ATTR_HTML: :width 700px
+#+ATTR_HTML: :width 500px
 [[file:images/sicp-02-fishbone.jpeg]]
 
 * 3.Modularity, Objects and State
-#+ATTR_HTML: :width 700px
+#+ATTR_HTML: :width 500px
 [[file:images/sicp-03.objects.jpeg]]
 * 4.Metalinguistic Abstration
-#+ATTR_HTML: :width 700px
+#+ATTR_HTML: :width 500px
 [[file:images/sicp-04.metalinguistic.jpeg]]
 * 5.Computing with Register Machines
-#+ATTR_HTML: :width 700px
+#+ATTR_HTML: :width 500px
 [[file:images/sicp-05.register-machine.jpeg]]
